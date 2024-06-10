@@ -1,7 +1,7 @@
 const AuthService = require('../services/auth.service');
 const { CREATED, OK } = require('../core/success.response');
-// Đảm bảo rằng dòng này tham chiếu đúng tới model user
-const User = require('../models/user.model');
+const jwt = require('jsonwebtoken'); // Đảm bảo rằng bạn đã import jsonwebtoken
+const KeyTokenModel = require('../models/keytoken.model');
 
 class AuthController {
     static registerUser = async (req, res, next) => {
@@ -88,6 +88,31 @@ class AuthController {
             message: "Change user status success!",
             metadata: await AuthService.changeUserStatus(req.params.id, req.body.status)
         }).sendData(res);
+    }
+
+    static async checkToken(req, res, next) {
+        try {
+            const token = req.headers['authorization'].split(' ')[1];
+            const userId = req.headers['x-user-id'];
+
+            if (!token || !userId) {
+                return res.status(400).json({ message: 'Token or user ID missing' });
+            }
+
+            const keyStore = await KeyTokenModel.findOne({ user: userId }).lean();
+            if (!keyStore) {
+                return res.status(401).json({ message: 'Not found key' });
+            }
+
+            jwt.verify(token, keyStore.publicKey, (err, user) => {
+                if (err) {
+                    return res.status(401).json({ message: 'Invalid token' });
+                }
+                return res.status(200).json({ message: 'Token is valid' });
+            });
+        } catch (error) {
+            next(error);
+        }
     }
 }
 

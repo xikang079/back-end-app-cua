@@ -1,3 +1,4 @@
+const { log } = require('winston');
 const CrabType = require('../models/crabType.model');
 const AuthError = require('../core/error.response').AuthError;
 
@@ -20,6 +21,8 @@ class CrabTypeService {
         });
 
         if (!crabType) throw new AuthError("Create crab type failed!");
+
+        // console.log(crabType);
 
         return { crabType };
     }

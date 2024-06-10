@@ -1,0 +1,10 @@
+{"level":"error","message":"Error 401: Daily summary already exists for today. Please delete the existing summary before creating a new one.","timestamp":"2024-05-29T08:43:02.124Z"}
+{"level":"error","message":"Error 401: Daily summary already exists for today. Please delete the existing summary before creating a new one.","timestamp":"2024-05-29T08:44:34.449Z"}
+{"level":"error","message":"Error 401: Unauthorized access!","timestamp":"2024-05-29T09:00:24.365Z"}
+{"level":"error","message":"Error 401: Unauthorized access!","timestamp":"2024-05-29T09:00:27.295Z"}
+{"level":"error","message":"Error 401: Unauthorized access to crab type","timestamp":"2024-05-29T09:56:03.469Z"}
+{"level":"error","message":"Error 401: Daily summary already exists for today. Please delete the existing summary before creating a new one.","timestamp":"2024-05-29T09:57:13.061Z"}
+{"level":"error","message":"Error 401: Daily summary already exists for today. Please delete the existing summary before creating a new one.","timestamp":"2024-05-29T09:58:14.988Z"}
+{"level":"error","message":"Error 401: Daily summary already exists for today. Please delete the existing summary before creating a new one.","timestamp":"2024-05-29T10:03:56.951Z"}
+{"level":"error","message":"Error 401: Báo cáo tổng hợp cho ngày hôm nay đã tồn tại. Vui lòng xoá báo cáo hiện tại trước khi tạo mới.","timestamp":"2024-05-29T10:09:20.986Z"}
+{"level":"error","message":"Error 401: Không có quyền truy cập!","timestamp":"2024-05-29T10:17:59.965Z"}

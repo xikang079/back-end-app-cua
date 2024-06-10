@@ -7,11 +7,17 @@ const { AuthError } = require('../core/error.response');
 class CrabPurchaseService {
     static async createCrabPurchase(userId, data) {
         const trader = await Trader.findById(data.trader);
-        if (!trader) throw new AuthError("Trader not found!");
+        if (!trader) throw new AuthError("Không tìm thấy thương nhân!");
 
         const crabs = await Promise.all(data.crabs.map(async crab => {
             const crabType = await CrabType.findById(crab.crabType);
-            if (!crabType) throw new AuthError("Crab type not found!");
+            if (!crabType) throw new AuthError("Không tìm thấy loại cua!");
+
+            // Kiểm tra xem crabType có thuộc vựa của người dùng hiện tại không
+            if (crabType.user.toString() !== userId) {
+                throw new AuthError("Không có quyền truy cập vào loại cua này");
+            }
+
             return {
                 crabType: crabType._id,
                 weight: crab.weight,
@@ -29,31 +35,51 @@ class CrabPurchaseService {
             user: userId
         });
 
-        if (!crabPurchase) throw new AuthError("Create crab purchase failed!");
+        if (!crabPurchase) throw new AuthError("Tạo hoá đơn mua cua thất bại!");
 
         return { crabPurchase };
     }
 
-    static async getAllCrabPurchases(userId) {
-        return await CrabPurchase.find({ user: userId }).populate('trader crabs.crabType').lean();
+    // Các phương thức khác vẫn giữ nguyên
+
+    static async getAllCrabPurchases(userId, page = 1, limit = 10) {
+        const crabPurchases = await CrabPurchase.find({ user: userId })
+            .skip((page - 1) * limit)
+            .limit(Number(limit))
+            .populate('trader crabs.crabType')
+            .lean();
+        return {
+            pagination: {
+                page,
+                limit,
+                total: crabPurchases.length
+            },
+            crabPurchases
+        };
     }
 
     static async getCrabPurchaseById(id, userId) {
         const crabPurchase = await CrabPurchase.findOne({ _id: id, user: userId }).populate('trader crabs.crabType').lean();
-        if (!crabPurchase) throw new AuthError("Crab purchase not found!");
+        if (!crabPurchase) throw new AuthError("Không tìm thấy hoá đơn mua cua!");
         return crabPurchase;
     }
 
     static async updateCrabPurchase(id, data, userId) {
         const crabPurchase = await CrabPurchase.findOne({ _id: id, user: userId });
-        if (!crabPurchase) throw new AuthError("Crab purchase not found!");
+        if (!crabPurchase) throw new AuthError("Không tìm thấy hoá đơn mua cua!");
 
         const trader = await Trader.findById(data.trader);
-        if (!trader) throw new AuthError("Trader not found!");
+        if (!trader) throw new AuthError("Không tìm thấy thương nhân!");
 
         const crabs = await Promise.all(data.crabs.map(async crab => {
             const crabType = await CrabType.findById(crab.crabType);
-            if (!crabType) throw new AuthError("Crab type not found!");
+            if (!crabType) throw new AuthError("Không tìm thấy loại cua!");
+
+            // Kiểm tra xem crabType có thuộc vựa của người dùng hiện tại không
+            if (crabType.user.toString() !== userId) {
+                throw new AuthError("Không có quyền truy cập vào loại cua này");
+            }
+
             return {
                 crabType: crabType._id,
                 weight: crab.weight,
@@ -75,16 +101,19 @@ class CrabPurchaseService {
 
     static async deleteCrabPurchase(id, userId) {
         const crabPurchase = await CrabPurchase.findOneAndDelete({ _id: id, user: userId }).lean();
-        if (!crabPurchase) throw new AuthError("Delete crab purchase failed!");
+        if (!crabPurchase) throw new AuthError("Xoá hoá đơn mua cua thất bại!");
         return crabPurchase;
     }
 
-    static async getCrabPurchasesByDepotAndDate(depotId, date, page = 1, limit = 10) {
+    static async getCrabPurchasesByDepotAndDate(depotId, date, page = 1, limit = 10, user) {
+        if (user.id !== depotId && user.role !== 'admin') {
+            throw new AuthError("Không có quyền truy cập!");
+        }
         const crabPurchases = await CrabPurchase.find({
             user: depotId,
             createdAt: {
-                $gte: new Date(date).setHours(0, 0, 0, 0),
-                $lt: new Date(date).setHours(23, 59, 59, 999),
+                $gte: new Date(date).setHours(6, 0, 0, 0),
+                $lt: new Date(date).setHours(29, 59, 59, 999), // 5:59:59 AM của ngày hôm sau
             },
         })
             .populate('trader crabs.crabType')
@@ -94,7 +123,10 @@ class CrabPurchaseService {
         return crabPurchases;
     }
 
-    static async getCrabPurchasesByDepotAndTrader(depotId, traderId, page = 1, limit = 10) {
+    static async getCrabPurchasesByDepotAndTrader(depotId, traderId, page = 1, limit = 10, user) {
+        if (user.id !== depotId && user.role !== 'admin') {
+            throw new AuthError("Không có quyền truy cập!");
+        }
         const crabPurchases = await CrabPurchase.find({
             user: depotId,
             trader: traderId
@@ -106,7 +138,10 @@ class CrabPurchaseService {
         return crabPurchases;
     }
 
-    static async getCrabPurchasesByDepotAndMonth(depotId, month, year, page = 1, limit = 10) {
+    static async getCrabPurchasesByDepotAndMonth(depotId, month, year, page = 1, limit = 10, user) {
+        if (user.id !== depotId && user.role !== 'admin') {
+            throw new AuthError("Không có quyền truy cập!");
+        }
         const crabPurchases = await CrabPurchase.find({
             user: depotId,
             createdAt: {
@@ -121,7 +156,10 @@ class CrabPurchaseService {
         return crabPurchases;
     }
 
-    static async getCrabPurchasesByDepotAndYear(depotId, year, page = 1, limit = 10) {
+    static async getCrabPurchasesByDepotAndYear(depotId, year, page = 1, limit = 10, user) {
+        if (user.id !== depotId && user.role !== 'admin') {
+            throw new AuthError("Không có quyền truy cập!");
+        }
         const crabPurchases = await CrabPurchase.find({
             user: depotId,
             createdAt: {
@@ -165,28 +203,46 @@ class CrabPurchaseService {
         return crabPurchases;
     }
 
-    static async createDailySummaryByDepotToday(depotId) {
-        const todayStart = new Date();
-        todayStart.setHours(0, 0, 0, 0);
+    static async createDailySummaryByDepotToday(depotId, user, startHour = 6, endHour = 6) {
+        if (user.id !== depotId && user.role !== 'admin') {
+            throw new AuthError("Không có quyền truy cập!");
+        }
 
-        const todayEnd = new Date();
-        todayEnd.setHours(23, 59, 59, 999);
+        const now = new Date();
+        const todayStart = new Date(now);
+        todayStart.setHours(startHour, 0, 0, 0);
 
-        console.log('Today Start:', todayStart);
-        console.log('Today End:', todayEnd);
+        const tomorrowStart = new Date(now);
+        tomorrowStart.setDate(tomorrowStart.getDate() + 1);
+        tomorrowStart.setHours(endHour, 0, 0, 0);
+
+        console.log('Bắt đầu ngày:', todayStart);
+        console.log('Bắt đầu ngày tiếp theo:', tomorrowStart);
+
+        const existingSummary = await DailySummary.findOne({
+            depot: depotId,
+            createdAt: {
+                $gte: todayStart,
+                $lt: tomorrowStart,
+            }
+        }).lean();
+
+        if (existingSummary) {
+            throw new AuthError("Báo cáo tổng hợp cho ngày hôm nay đã tồn tại. Vui lòng xoá báo cáo hiện tại trước khi tạo mới.");
+        }
 
         const crabPurchases = await CrabPurchase.find({
             user: depotId,
             createdAt: {
                 $gte: todayStart,
-                $lt: todayEnd,
+                $lt: tomorrowStart,
             }
         }).lean();
 
-        console.log('Crab Purchases:', crabPurchases);
+        console.log('Hoá đơn mua cua:', crabPurchases);
 
         if (crabPurchases.length === 0) {
-            console.log('No crab purchases found for today.');
+            console.log('Không tìm thấy hoá đơn mua cua cho hôm nay.');
             return { details: [], totalAmount: 0 };
         }
 
@@ -211,8 +267,8 @@ class CrabPurchaseService {
         const summaryDetails = Array.from(summaryMap.values());
         const totalAmount = summaryDetails.reduce((acc, detail) => acc + detail.totalCost, 0);
 
-        console.log('Summary Details:', summaryDetails);
-        console.log('Total Amount:', totalAmount);
+        console.log('Chi tiết tổng hợp:', summaryDetails);
+        console.log('Tổng số tiền:', totalAmount);
 
         const dailySummary = await DailySummary.create({
             depot: depotId,
@@ -220,17 +276,21 @@ class CrabPurchaseService {
             totalAmount,
         });
 
-        console.log('Daily Summary Created:', dailySummary);
+        console.log('Tạo báo cáo tổng hợp hàng ngày:', dailySummary);
 
         return dailySummary;
     }
 
-    static async getDailySummaryByDepotToday(depotId) {
+    static async getDailySummaryByDepotToday(depotId, user) {
+        if (user.id !== depotId && user.role !== 'admin') {
+            throw new AuthError("Không có quyền truy cập!");
+        }
         const todayStart = new Date();
-        todayStart.setHours(0, 0, 0, 0);
+        todayStart.setHours(6, 0, 0, 0);
 
-        const todayEnd = new Date();
-        todayEnd.setHours(23, 59, 59, 999);
+        const todayEnd = new Date(todayStart);
+        todayEnd.setDate(todayEnd.getDate() + 1);
+        todayEnd.setHours(5, 59, 59, 999);
 
         const dailySummary = await DailySummary.findOne({
             depot: depotId,
@@ -240,10 +300,10 @@ class CrabPurchaseService {
             }
         }).lean();
 
-        console.log('Daily Summary for today:', dailySummary);
+        console.log('Báo cáo tổng hợp cho hôm nay:', dailySummary);
 
         if (!dailySummary) {
-            console.log('No daily summary found for today.');
+            console.log('Không tìm thấy báo cáo tổng hợp cho hôm nay.');
             return { details: [], totalAmount: 0 };
         }
 

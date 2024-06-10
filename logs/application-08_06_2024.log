@@ -1,0 +1,9 @@
+{"level":"error","message":"Error 401: User not found!","timestamp":"2024-06-07T17:08:59.930Z"}
+{"level":"error","message":"Error 401: User not found!","timestamp":"2024-06-07T17:09:07.309Z"}
+{"level":"error","message":"Error 401: User not found!","timestamp":"2024-06-07T17:19:35.119Z"}
+{"level":"error","message":"Error 401: User not found!","timestamp":"2024-06-07T17:19:35.606Z"}
+{"level":"error","message":"Error 401: User not found!","timestamp":"2024-06-07T17:19:36.995Z"}
+{"level":"error","message":"Error 401: User not found!","timestamp":"2024-06-07T17:20:56.872Z"}
+{"level":"error","message":"Error 400: Password incorrect!","timestamp":"2024-06-07T17:26:08.467Z"}
+{"level":"error","message":"Error 500: KeyTokenModel is not defined","timestamp":"2024-06-08T16:09:06.936Z"}
+{"level":"error","message":"Error 500: jwt is not defined","timestamp":"2024-06-08T16:13:02.621Z"}

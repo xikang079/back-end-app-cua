@@ -1,7 +1,7 @@
 const User = require('../models/user.model'); // Đảm bảo đúng đường dẫn
 const AuthError = require('../core/error.response').AuthError;
 const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
+const jwt = require('jsonwebtoken'); // Đảm bảo rằng bạn đã import jsonwebtoken
 const crypto = require('node:crypto');
 const KeyTokenModel = require('../models/keytoken.model');
 
@@ -151,7 +151,6 @@ class AuthServices {
         }
         return user;
     }
-
 }
 
 module.exports = AuthServices;

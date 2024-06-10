@@ -4,14 +4,15 @@ const express = require('express');
 const router = express.Router();
 const CrabPurchaseController = require('../../controllers/crabPurchase.controller');
 const asyncHandle = require('../../utils/asyncHandle');
-const { checkAuthentication, checkIsAdmin } = require('../../middlewares');
+const { checkAuthentication, checkIsAdmin, checkOwnership } = require('../../middlewares/index');
+const CrabPurchase = require('../../models/crabPurchase.model');
 
 // CRUD hóa đơn mua cua
 router.post('/', checkAuthentication, asyncHandle(CrabPurchaseController.createCrabPurchase));
 router.get('/', checkAuthentication, asyncHandle(CrabPurchaseController.getAllCrabPurchases));
-router.get('/:id', checkAuthentication, asyncHandle(CrabPurchaseController.getCrabPurchaseById));
-router.put('/:id', checkAuthentication, asyncHandle(CrabPurchaseController.updateCrabPurchase));
-router.delete('/:id', checkAuthentication, asyncHandle(CrabPurchaseController.deleteCrabPurchase));
+router.get('/:id', checkAuthentication, checkOwnership(CrabPurchase, 'id'), asyncHandle(CrabPurchaseController.getCrabPurchaseById));
+router.put('/:id', checkAuthentication, checkOwnership(CrabPurchase, 'id'), asyncHandle(CrabPurchaseController.updateCrabPurchase));
+router.delete('/:id', checkAuthentication, checkOwnership(CrabPurchase, 'id'), asyncHandle(CrabPurchaseController.deleteCrabPurchase));
 
 // Các route tổng hợp và báo cáo
 router.get('/depot/:depotId/date/:date', checkAuthentication, asyncHandle(CrabPurchaseController.getCrabPurchasesByDepotAndDate));

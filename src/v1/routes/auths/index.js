@@ -12,6 +12,9 @@ router.post('/register', asyncHandle(AuthController.registerUser));
 // Đăng nhập
 router.post('/login', asyncHandle(AuthController.loginUser));
 
+// Kiểm tra tính hợp lệ của token
+router.get('/check-token', asyncHandle(AuthController.checkToken));
+
 // Đăng xuất
 router.post('/logout-all', checkAuthentication, asyncHandle(AuthController.logoutAll));
 
