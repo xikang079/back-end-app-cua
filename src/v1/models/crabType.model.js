@@ -19,7 +19,8 @@ const crabTypeSchema = new Schema({
         ref: 'User',
         required: true,
         unique: true,
-    }
+    },
+    isDeleted: { type: Boolean, default: false } // Thêm cờ đánh dấu
 }, {
     timestamps: true,
     collection: COLLECTION_NAME,

@@ -2,7 +2,6 @@ const express = require('express');
 const app = express();
 const helmet = require('helmet');
 const compression = require('compression');
-const { mongo, default: mongoose } = require('mongoose');
 require('dotenv').config();
 const { handleErrorsValidationMongoose } = require('./v1/middlewares/index');
 const winston = require('winston');
@@ -13,7 +12,6 @@ const { Writable } = require('stream');
 const axios = require('axios');
 
 const { createServer } = require('node:http');
-const { join } = require('node:path');
 const server = createServer(app);
 
 require('./v1/databases/init.mongodb');
@@ -49,9 +47,15 @@ const fileTransport = new winston.transports.DailyRotateFile({
 const telegramLogStream = new Writable({
     write: function(chunk, encoding, callback) {
         const message = chunk.toString(); 
+        // Remove special characters that might break Markdown parsing
+        const cleanMessage = message.replace(/[\[\]\(\)_*`]/g, '');
+        if (cleanMessage.length > 4096) { // Telegram message length limit
+            console.warn('Message too long, skipping Telegram notification.');
+            return callback(); // Skip sending message
+        }
         axios.post(TELEGRAM_API_URL, {
             chat_id: TELEGRAM_CHAT_ID,
-            text: message,
+            text: cleanMessage,
             parse_mode: 'Markdown'
         })
         .then(response => {
@@ -105,7 +109,8 @@ app.use(handleErrorsValidationMongoose);
 
 // General error handler
 app.use((error, req, res, next) => {
-    logger.error(`Error ${error.status || 500}: ${error.message}`);
+    const errorMessage = `Error ${error.status || 500}: ${error.message}`;
+    logger.error(errorMessage);
     res.status(error.status || 500).send({
         error: {
             status: error.status || 500,

@@ -1,0 +1,12 @@
+{"level":"error","message":"Error 401: Không có quyền truy cập!","timestamp":"2024-06-10T17:02:02.496Z"}
+{"level":"error","message":"Error 401: Không có quyền truy cập!","timestamp":"2024-06-10T17:02:04.418Z"}
+{"level":"error","message":"Error 500: Cast to ObjectId failed for value \"\" (type string) at path \"_id\" for model \"CrabType\"","timestamp":"2024-06-10T17:02:25.211Z"}
+{"level":"error","message":"Error 401: Không có quyền truy cập!","timestamp":"2024-06-10T17:05:19.995Z"}
+{"level":"error","message":"Error 401: Delete trader failed!","timestamp":"2024-06-11T03:28:10.499Z"}
+{"level":"error","message":"Error 401: Delete trader failed!","timestamp":"2024-06-11T03:28:35.310Z"}
+{"level":"error","message":"Error 401: Delete trader failed!","timestamp":"2024-06-11T03:29:20.441Z"}
+{"level":"error","message":"Error 401: Delete trader failed!","timestamp":"2024-06-11T03:37:37.959Z"}
+{"level":"error","message":"Error 401: Không có quyền truy cập!","timestamp":"2024-06-11T04:04:37.402Z"}
+{"level":"error","message":"Error 401: Không có quyền truy cập!","timestamp":"2024-06-11T04:31:14.129Z"}
+{"level":"error","message":"Error 401: Không có quyền truy cập!","timestamp":"2024-06-11T14:42:52.451Z"}
+{"level":"error","message":"Error 401: Không có quyền truy cập!","timestamp":"2024-06-11T14:44:42.839Z"}

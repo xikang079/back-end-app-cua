@@ -1,16 +1,19 @@
+const mongoose = require('mongoose');
 const CrabPurchase = require('../models/crabPurchase.model');
 const CrabType = require('../models/crabType.model');
 const Trader = require('../models/trader.model');
 const DailySummary = require('../models/dailySummary.model');
 const { AuthError } = require('../core/error.response');
+const { log } = require('winston');
+const moment = require('moment-timezone');
 
 class CrabPurchaseService {
     static async createCrabPurchase(userId, data) {
-        const trader = await Trader.findById(data.trader);
+        const trader = await Trader.findOne({ _id: data.trader, isDeleted: false });
         if (!trader) throw new AuthError("Không tìm thấy thương nhân!");
 
         const crabs = await Promise.all(data.crabs.map(async crab => {
-            const crabType = await CrabType.findById(crab.crabType);
+            const crabType = await CrabType.findOne({ _id: crab.crabType, isDeleted: false });
             if (!crabType) throw new AuthError("Không tìm thấy loại cua!");
 
             // Kiểm tra xem crabType có thuộc vựa của người dùng hiện tại không
@@ -28,11 +31,15 @@ class CrabPurchaseService {
 
         const totalCost = crabs.reduce((acc, crab) => acc + crab.totalCost, 0);
 
+        // Sử dụng moment-timezone để lấy thời gian hiện tại theo múi giờ Việt Nam
+        const createdAt = moment.tz('Asia/Ho_Chi_Minh').toDate();
+
         const crabPurchase = await CrabPurchase.create({
             trader: data.trader,
             crabs,
             totalCost,
-            user: userId
+            user: userId,
+            createdAt: createdAt // Lưu thời gian tạo hóa đơn
         });
 
         if (!crabPurchase) throw new AuthError("Tạo hoá đơn mua cua thất bại!");
@@ -40,13 +47,14 @@ class CrabPurchaseService {
         return { crabPurchase };
     }
 
-    // Các phương thức khác vẫn giữ nguyên
-
     static async getAllCrabPurchases(userId, page = 1, limit = 10) {
         const crabPurchases = await CrabPurchase.find({ user: userId })
             .skip((page - 1) * limit)
             .limit(Number(limit))
-            .populate('trader crabs.crabType')
+            .populate({
+                path: 'trader crabs.crabType',
+                match: { isDeleted: { $ne: true } }
+            })
             .lean();
         return {
             pagination: {
@@ -59,7 +67,12 @@ class CrabPurchaseService {
     }
 
     static async getCrabPurchaseById(id, userId) {
-        const crabPurchase = await CrabPurchase.findOne({ _id: id, user: userId }).populate('trader crabs.crabType').lean();
+        const crabPurchase = await CrabPurchase.findOne({ _id: id, user: userId })
+            .populate({
+                path: 'trader crabs.crabType',
+                match: { isDeleted: { $ne: true } }
+            })
+            .lean();
         if (!crabPurchase) throw new AuthError("Không tìm thấy hoá đơn mua cua!");
         return crabPurchase;
     }
@@ -68,11 +81,11 @@ class CrabPurchaseService {
         const crabPurchase = await CrabPurchase.findOne({ _id: id, user: userId });
         if (!crabPurchase) throw new AuthError("Không tìm thấy hoá đơn mua cua!");
 
-        const trader = await Trader.findById(data.trader);
+        const trader = await Trader.findOne({ _id: data.trader, isDeleted: false });
         if (!trader) throw new AuthError("Không tìm thấy thương nhân!");
 
         const crabs = await Promise.all(data.crabs.map(async crab => {
-            const crabType = await CrabType.findById(crab.crabType);
+            const crabType = await CrabType.findOne({ _id: crab.crabType, isDeleted: false });
             if (!crabType) throw new AuthError("Không tìm thấy loại cua!");
 
             // Kiểm tra xem crabType có thuộc vựa của người dùng hiện tại không
@@ -105,21 +118,29 @@ class CrabPurchaseService {
         return crabPurchase;
     }
 
-    static async getCrabPurchasesByDepotAndDate(depotId, date, page = 1, limit = 10, user) {
+    static async getCrabPurchasesByDepotAndDate(depotId, date, page = 1, limit = 100, user) {
         if (user.id !== depotId && user.role !== 'admin') {
             throw new AuthError("Không có quyền truy cập!");
         }
+
+        const todayStart = moment.tz(date, 'Asia/Ho_Chi_Minh').startOf('day').add(6, 'hours');
+        const tomorrowStart = todayStart.clone().add(1, 'day');
+
         const crabPurchases = await CrabPurchase.find({
             user: depotId,
             createdAt: {
-                $gte: new Date(date).setHours(6, 0, 0, 0),
-                $lt: new Date(date).setHours(29, 59, 59, 999), // 5:59:59 AM của ngày hôm sau
+                $gte: todayStart.toDate(),
+                $lt: tomorrowStart.toDate(),
             },
         })
-            .populate('trader crabs.crabType')
+            .populate({
+                path: 'trader crabs.crabType',
+                match: { isDeleted: { $ne: true } }
+            })
             .skip((page - 1) * limit)
             .limit(limit)
             .lean();
+
         return crabPurchases;
     }
 
@@ -131,7 +152,10 @@ class CrabPurchaseService {
             user: depotId,
             trader: traderId
         })
-            .populate('trader crabs.crabType')
+            .populate({
+                path: 'trader crabs.crabType',
+                match: { isDeleted: { $ne: true } }
+            })
             .skip((page - 1) * limit)
             .limit(limit)
             .lean();
@@ -149,7 +173,10 @@ class CrabPurchaseService {
                 $lt: new Date(year, month, 1),
             },
         })
-            .populate('trader crabs.crabType')
+            .populate({
+                path: 'trader crabs.crabType',
+                match: { isDeleted: { $ne: true } }
+            })
             .skip((page - 1) * limit)
             .limit(limit)
             .lean();
@@ -167,7 +194,10 @@ class CrabPurchaseService {
                 $lt: new Date(year + 1, 0, 1),
             },
         })
-            .populate('trader crabs.crabType')
+            .populate({
+                path: 'trader crabs.crabType',
+                match: { isDeleted: { $ne: true } }
+            })
             .skip((page - 1) * limit)
             .limit(limit)
             .lean();
@@ -203,27 +233,23 @@ class CrabPurchaseService {
         return crabPurchases;
     }
 
+    // Controller method on the server
     static async createDailySummaryByDepotToday(depotId, user, startHour = 6, endHour = 6) {
         if (user.id !== depotId && user.role !== 'admin') {
             throw new AuthError("Không có quyền truy cập!");
         }
 
-        const now = new Date();
-        const todayStart = new Date(now);
-        todayStart.setHours(startHour, 0, 0, 0);
+        const now = moment.tz('Asia/Ho_Chi_Minh');
+        const todayStart = now.clone().startOf('day').add(startHour, 'hours');
+        const tomorrowStart = todayStart.clone().add(1, 'day');
 
-        const tomorrowStart = new Date(now);
-        tomorrowStart.setDate(tomorrowStart.getDate() + 1);
-        tomorrowStart.setHours(endHour, 0, 0, 0);
-
-        console.log('Bắt đầu ngày:', todayStart);
-        console.log('Bắt đầu ngày tiếp theo:', tomorrowStart);
+        const depotObjectId = mongoose.Types.ObjectId.createFromHexString(depotId);
 
         const existingSummary = await DailySummary.findOne({
-            depot: depotId,
+            depot: depotObjectId,
             createdAt: {
-                $gte: todayStart,
-                $lt: tomorrowStart,
+                $gte: todayStart.toDate(),
+                $lt: tomorrowStart.toDate(),
             }
         }).lean();
 
@@ -232,17 +258,14 @@ class CrabPurchaseService {
         }
 
         const crabPurchases = await CrabPurchase.find({
-            user: depotId,
+            user: depotObjectId,
             createdAt: {
-                $gte: todayStart,
-                $lt: tomorrowStart,
+                $gte: todayStart.toDate(),
+                $lt: tomorrowStart.toDate(),
             }
         }).lean();
 
-        console.log('Hoá đơn mua cua:', crabPurchases);
-
         if (crabPurchases.length === 0) {
-            console.log('Không tìm thấy hoá đơn mua cua cho hôm nay.');
             return { details: [], totalAmount: 0 };
         }
 
@@ -267,48 +290,44 @@ class CrabPurchaseService {
         const summaryDetails = Array.from(summaryMap.values());
         const totalAmount = summaryDetails.reduce((acc, detail) => acc + detail.totalCost, 0);
 
-        console.log('Chi tiết tổng hợp:', summaryDetails);
-        console.log('Tổng số tiền:', totalAmount);
-
         const dailySummary = await DailySummary.create({
-            depot: depotId,
+            depot: depotObjectId,
             details: summaryDetails,
             totalAmount,
         });
 
-        console.log('Tạo báo cáo tổng hợp hàng ngày:', dailySummary);
+        // console.log("Created Daily Summary:", dailySummary); // Add this line to debug
 
         return dailySummary;
     }
+
 
     static async getDailySummaryByDepotToday(depotId, user) {
         if (user.id !== depotId && user.role !== 'admin') {
             throw new AuthError("Không có quyền truy cập!");
         }
-        const todayStart = new Date();
-        todayStart.setHours(6, 0, 0, 0);
 
-        const todayEnd = new Date(todayStart);
-        todayEnd.setDate(todayEnd.getDate() + 1);
-        todayEnd.setHours(5, 59, 59, 999);
+        const todayStart = moment.tz('Asia/Ho_Chi_Minh').startOf('day').add(6, 'hours');
+        const todayEnd = todayStart.clone().add(1, 'day');
 
         const dailySummary = await DailySummary.findOne({
             depot: depotId,
             createdAt: {
-                $gte: todayStart,
-                $lt: todayEnd,
+                $gte: todayStart.toDate(),
+                $lt: todayEnd.toDate(),
             }
         }).lean();
-
-        console.log('Báo cáo tổng hợp cho hôm nay:', dailySummary);
 
         if (!dailySummary) {
             console.log('Không tìm thấy báo cáo tổng hợp cho hôm nay.');
             return { details: [], totalAmount: 0 };
         }
 
+        console.log('Fetched Daily Summary from Server:', dailySummary); // Debugging print statement
+
         return dailySummary;
     }
+
 
     static async getAllDailySummariesByDepot(depotId, page = 1, limit = 10) {
         const dailySummaries = await DailySummary.find({ depot: depotId })

@@ -1,38 +1,44 @@
 const { log } = require('winston');
 const CrabType = require('../models/crabType.model');
+const CrabPurchase = require('../models/crabPurchase.model');
 const AuthError = require('../core/error.response').AuthError;
 
 class CrabTypeService {
     static async createCrabType(userId, data) {
-        // Kiểm tra xem tên loại cua đã tồn tại cho vựa cụ thể hay chưa
-        const existingCrabType = await CrabType.findOne({
-            name: data.name,
-            user: userId,
-        });
+        try {
+            // Kiểm tra xem tên loại cua đã tồn tại cho vựa cụ thể hay chưa
+            const existingCrabType = await CrabType.findOne({
+                name: data.name,
+                user: userId,
+                isDeleted: false
+            });
 
-        if (existingCrabType) {
-            throw new AuthError("Crab type name already exists for this depot!");
+            if (existingCrabType) {
+                throw new AuthError("Crab type name already exists for this depot!");
+            }
+
+            const crabType = await CrabType.create({
+                name: data.name,
+                pricePerKg: data.pricePerKg,
+                user: userId,
+                isDeleted: false // Ensure isDeleted is set to false by default
+            });
+
+            if (!crabType) throw new AuthError("Create crab type failed!");
+
+            return { crabType };
+        } catch (error) {
+            log.error(`Failed to create crab type: ${error.message}`);
+            throw error;
         }
-
-        const crabType = await CrabType.create({
-            name: data.name,
-            pricePerKg: data.pricePerKg,
-            user: userId,
-        });
-
-        if (!crabType) throw new AuthError("Create crab type failed!");
-
-        // console.log(crabType);
-
-        return { crabType };
     }
 
     static async getAllCrabTypesByUser(user) {
-        return await CrabType.find({ user }).lean();
+        return await CrabType.find({ user, isDeleted: false }).lean();
     }
 
     static async getAllCrabTypesByDepots() {
-        const crabTypes = await CrabType.find().lean();
+        const crabTypes = await CrabType.find({ isDeleted: false }).lean();
         const groupedCrabTypes = crabTypes.reduce((acc, crabType) => {
             const depotId = crabType.user.toString();
             if (!acc[depotId]) {
@@ -46,16 +52,17 @@ class CrabTypeService {
 
     static async getCrabTypeById(id) {
         const crabType = await CrabType.findById(id).lean();
-        if (!crabType) throw new AuthError("Crab type not found!");
+        if (!crabType || crabType.isDeleted) throw new AuthError("Crab type not found!");
         return crabType;
     }
 
     static async updateCrabType(id, data) {
         const findCrab = await CrabType.findOne({
             _id: id,
+            isDeleted: false
         });
         
-        if(!findCrab) throw new AuthError("Crab type can not find!");
+        if (!findCrab) throw new AuthError("Crab type can not find!");
 
         const crabType = await CrabType.findByIdAndUpdate(id, data, { new: true }).lean();
         if (!crabType) throw new AuthError("Update crab type failed!");
@@ -63,8 +70,23 @@ class CrabTypeService {
     }
 
     static async deleteCrabType(id) {
-        const crabType = await CrabType.findByIdAndDelete(id).lean();
-        if (!crabType) throw new AuthError("Delete crab type failed!");
+        const crabType = await CrabType.findById(id);
+        if (!crabType || crabType.isDeleted) {
+            throw new AuthError("Delete crab type failed!");
+        }
+
+        // Kiểm tra xem CrabType có xuất hiện trong hóa đơn nào không
+        const existingPurchase = await CrabPurchase.findOne({
+            'crabs.crabType': id,
+        });
+
+        if (existingPurchase) {
+            throw new AuthError("Cannot delete crab type as it exists in one or more invoices!");
+        }
+
+        crabType.isDeleted = true;
+        await crabType.save();
+        
         return crabType;
     }
 }

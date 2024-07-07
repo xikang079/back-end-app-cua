@@ -1,5 +1,6 @@
 const Trader = require('../models/trader.model');
 const AuthError = require('../core/error.response').AuthError;
+const CrabPurchase = require('../models/crabPurchase.model'); // Import mô hình CrabPurchase để kiểm tra hóa đơn
 
 class TraderService {
     static async createTrader(userId, data) {
@@ -7,6 +8,7 @@ class TraderService {
         const existingTrader = await Trader.findOne({
             name: data.name,
             user: userId,
+            isDeleted: false // Chỉ tìm các thương lái chưa bị xóa
         });
 
         if (existingTrader) {
@@ -25,11 +27,11 @@ class TraderService {
     }
 
     static async getAllTradersByUser(user) {
-        return await Trader.find({ user }).lean();
+        return await Trader.find({ user, isDeleted: false }).lean(); // Chỉ trả về các thương lái chưa bị xóa
     }
 
     static async getAllTradersByDepots() {
-        const traders = await Trader.find().lean();
+        const traders = await Trader.find({ isDeleted: false }).lean(); // Chỉ trả về các thương lái chưa bị xóa
         const groupedTraders = traders.reduce((acc, trader) => {
             const depotId = trader.user.toString();
             if (!acc[depotId]) {
@@ -43,20 +45,42 @@ class TraderService {
 
     static async getTraderById(id) {
         const trader = await Trader.findById(id).lean();
-        if (!trader) throw new AuthError("Trader not found!");
+        if (!trader || trader.isDeleted) throw new AuthError("Trader not found!");
         return trader;
     }
 
     static async updateTrader(id, data) {
-        const trader = await Trader.findByIdAndUpdate(id, data, { new: true }).lean();
+        const trader = await Trader.findOneAndUpdate(
+            { _id: id, isDeleted: false },
+            data,
+            { new: true }
+        ).lean();
         if (!trader) throw new AuthError("Update trader failed!");
         return trader;
     }
 
-    static async deleteTrader(id) {
-        const trader = await Trader.findByIdAndDelete(id).lean();
-        if (!trader) throw new AuthError("Delete trader failed!");
-        return trader;
+    static async deleteTrader(id, user) {
+        const trader = await Trader.findById(id);
+        if (!trader || trader.isDeleted) throw new AuthError("Trader not found!");
+
+        // Kiểm tra quyền sở hữu hoặc quyền admin
+        if (trader.user.toString() !== user.id && user.role !== 'admin') {
+            throw new AuthError("Không có quyền truy cập!");
+        }
+
+        // Kiểm tra xem Trader có xuất hiện trong hóa đơn nào không
+        const existingPurchase = await CrabPurchase.findOne({
+            'trader': id,
+        });
+
+        if (existingPurchase) {
+            throw new AuthError("Cannot delete trader as it exists in one or more invoices!");
+        }
+
+        trader.isDeleted = true;
+        await trader.save();
+
+        return { message: "Trader deleted successfully" };
     }
 }
 

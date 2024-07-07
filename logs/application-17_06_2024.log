@@ -1,0 +1,25 @@
+{"level":"error","message":"Error 401: Không có quyền truy cập!","timestamp":"2024-06-17T13:19:15.683Z"}
+{"level":"error","message":"Error 401: Không có quyền truy cập!","timestamp":"2024-06-17T14:39:05.430Z"}
+{"level":"error","message":"Error 401: Không có quyền truy cập!","timestamp":"2024-06-17T14:47:16.335Z"}
+{"level":"error","message":"Error 400: Password incorrect!","timestamp":"2024-06-17T14:47:26.370Z"}
+{"level":"error","message":"Error 401: Không có quyền truy cập!","timestamp":"2024-06-17T14:50:29.453Z"}
+{"level":"error","message":"Error 401: Delete crab type failed!","timestamp":"2024-06-17T14:51:37.208Z"}
+{"level":"error","message":"Error 401: Delete crab type failed!","timestamp":"2024-06-17T14:52:10.759Z"}
+{"level":"error","message":"Error 401: Không có quyền truy cập!","timestamp":"2024-06-17T14:54:09.561Z"}
+{"level":"error","message":"Error 500: E11000 duplicate key error collection: app-cua.CrabTypes index: user_1 dup key: { user: ObjectId('665174ac50b1f24c7cbd9375') }","timestamp":"2024-06-17T15:06:30.573Z"}
+{"level":"error","message":"Error 500: E11000 duplicate key error collection: app-cua.CrabTypes index: user_1 dup key: { user: ObjectId('665174ac50b1f24c7cbd9375') }","timestamp":"2024-06-17T15:07:25.420Z"}
+{"level":"error","message":"Error 500: E11000 duplicate key error collection: app-cua.CrabTypes index: user_1 dup key: { user: ObjectId('665174ac50b1f24c7cbd9375') }","timestamp":"2024-06-17T15:08:20.169Z"}
+{"level":"error","message":"Error 500: E11000 duplicate key error collection: app-cua.CrabTypes index: user_1 dup key: { user: ObjectId('665174ac50b1f24c7cbd9375') }","timestamp":"2024-06-17T15:10:50.961Z"}
+{"level":"error","message":"Error 500: Cast to ObjectId failed for value \"yourDepotId\" (type string) at path \"depot\" for model \"DailySummary\"","timestamp":"2024-06-17T15:11:05.473Z"}
+{"level":"error","message":"Error 500: E11000 duplicate key error collection: app-cua.CrabTypes index: user_1 dup key: { user: ObjectId('665174ac50b1f24c7cbd9375') }","timestamp":"2024-06-17T15:14:37.460Z"}
+{"level":"error","message":"Error 500: E11000 duplicate key error collection: app-cua.CrabTypes index: user_1 dup key: { user: ObjectId('665174ac50b1f24c7cbd9375') }","timestamp":"2024-06-17T15:15:28.380Z"}
+{"level":"error","message":"Error 500: E11000 duplicate key error collection: app-cua.CrabTypes index: user_1 dup key: { user: ObjectId('665174ac50b1f24c7cbd9375') }","timestamp":"2024-06-17T15:16:27.302Z"}
+{"level":"error","message":"Error 500: log.error is not a function","timestamp":"2024-06-17T15:18:28.101Z"}
+{"level":"error","message":"Error 500: E11000 duplicate key error collection: app-cua.CrabTypes index: user_1 dup key: { user: ObjectId('665174ac50b1f24c7cbd9375') }","timestamp":"2024-06-17T15:20:01.332Z"}
+{"level":"error","message":"Error 401: Cannot delete crab type as it exists in one or more invoices!","timestamp":"2024-06-17T15:25:11.652Z"}
+{"level":"error","message":"Error 401: Cannot delete crab type as it exists in one or more invoices!","timestamp":"2024-06-17T15:25:11.672Z"}
+{"level":"error","message":"Error 500: log.error is not a function","timestamp":"2024-06-17T15:49:28.897Z"}
+{"level":"error","message":"Error 500: log.error is not a function","timestamp":"2024-06-17T15:50:27.175Z"}
+{"level":"error","message":"Error 500: log.error is not a function","timestamp":"2024-06-17T15:51:54.265Z"}
+{"level":"error","message":"Error 401: Cannot delete trader as it exists in one or more invoices!","timestamp":"2024-06-17T16:02:34.602Z"}
+{"level":"error","message":"Error 401: Cannot delete trader as it exists in one or more invoices!","timestamp":"2024-06-17T16:02:42.401Z"}

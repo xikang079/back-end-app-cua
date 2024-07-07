@@ -1,0 +1,22 @@
+{"level":"error","message":"Error 500: Cast to ObjectId failed for value \"yourDepotId\" (type string) at path \"depot\" for model \"DailySummary\"","timestamp":"2024-06-18T03:41:06.796Z"}
+{"level":"error","message":"Error 401: Không có quyền truy cập!","timestamp":"2024-06-18T03:44:34.858Z"}
+{"level":"error","message":"Error 500: log.error is not a function","timestamp":"2024-06-18T03:46:48.188Z"}
+{"level":"error","message":"Error 500: mongoose is not defined","timestamp":"2024-06-18T08:00:07.779Z"}
+{"level":"error","message":"Error 500: mongoose is not defined","timestamp":"2024-06-18T08:00:44.127Z"}
+{"level":"error","message":"Error 500: mongoose is not defined","timestamp":"2024-06-18T08:01:45.261Z"}
+{"level":"error","message":"Error 500: Class constructor ObjectId cannot be invoked without 'new'","timestamp":"2024-06-18T08:03:16.199Z"}
+{"level":"error","message":"Error 500: Class constructor ObjectId cannot be invoked without 'new'","timestamp":"2024-06-18T08:03:22.945Z"}
+{"level":"error","message":"Error 500: Class constructor ObjectId cannot be invoked without 'new'","timestamp":"2024-06-18T08:04:26.544Z"}
+{"level":"error","message":"Error 500: Class constructor ObjectId cannot be invoked without 'new'","timestamp":"2024-06-18T08:07:22.658Z"}
+{"level":"error","message":"Error 401: Báo cáo tổng hợp cho ngày hôm nay đã tồn tại. Vui lòng xoá báo cáo hiện tại trước khi tạo mới.","timestamp":"2024-06-18T08:16:07.058Z"}
+{"level":"error","message":"Error 401: Báo cáo tổng hợp cho ngày hôm nay đã tồn tại. Vui lòng xoá báo cáo hiện tại trước khi tạo mới.","timestamp":"2024-06-18T08:33:06.802Z"}
+{"level":"error","message":"Error 401: Báo cáo tổng hợp cho ngày hôm nay đã tồn tại. Vui lòng xoá báo cáo hiện tại trước khi tạo mới.","timestamp":"2024-06-18T08:38:01.010Z"}
+{"level":"error","message":"Error 401: Báo cáo tổng hợp cho ngày hôm nay đã tồn tại. Vui lòng xoá báo cáo hiện tại trước khi tạo mới.","timestamp":"2024-06-18T08:39:14.022Z"}
+{"level":"error","message":"Error 401: Báo cáo tổng hợp cho ngày hôm nay đã tồn tại. Vui lòng xoá báo cáo hiện tại trước khi tạo mới.","timestamp":"2024-06-18T08:40:35.494Z"}
+{"level":"error","message":"Error 401: Báo cáo tổng hợp cho ngày hôm nay đã tồn tại. Vui lòng xoá báo cáo hiện tại trước khi tạo mới.","timestamp":"2024-06-18T08:42:03.165Z"}
+{"level":"error","message":"Error 401: Báo cáo tổng hợp cho ngày hôm nay đã tồn tại. Vui lòng xoá báo cáo hiện tại trước khi tạo mới.","timestamp":"2024-06-18T08:42:46.229Z"}
+{"level":"error","message":"Error 401: Báo cáo tổng hợp cho ngày hôm nay đã tồn tại. Vui lòng xoá báo cáo hiện tại trước khi tạo mới.","timestamp":"2024-06-18T08:43:07.766Z"}
+{"level":"error","message":"Error 401: Báo cáo tổng hợp cho ngày hôm nay đã tồn tại. Vui lòng xoá báo cáo hiện tại trước khi tạo mới.","timestamp":"2024-06-18T08:57:52.095Z"}
+{"level":"error","message":"Error 401: Không có quyền truy cập!","timestamp":"2024-06-18T09:40:30.511Z"}
+{"level":"error","message":"Error 401: Không có quyền truy cập!","timestamp":"2024-06-18T09:40:31.403Z"}
+{"level":"error","message":"Error 401: User not found!","timestamp":"2024-06-18T09:41:46.057Z"}

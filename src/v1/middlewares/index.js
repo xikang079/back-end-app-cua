@@ -22,23 +22,23 @@ const handleErrorsValidationMongoose = (error, req, res, next) => {
 const checkAuthentication = async (req, res, next) => {
     try {
         const userId = req.headers['x-user-id'];
-        if (!userId) return res.status(401).json({ message: 'Not found user' });
+        if (!userId) return res.status(401).json({ message: 'Không tìm thấy người dùng' });
 
         const keyStore = await KeyTokenModel.findOne({ user: userId }).lean();
-        if (!keyStore) return res.status(401).json({ message: 'Not found key' });
+        if (!keyStore) return res.status(401).json({ message: 'Không tìm thấy khóa' });
 
         const auth = req.headers['authorization'];
-        if (!auth) return res.status(401).json({ message: 'Unauthorized' });
+        if (!auth) return res.status(401).json({ message: 'Chưa xác thực' });
 
         const token = auth.split(' ')[1];
         jwt.verify(token, keyStore.publicKey, (err, user) => {
-            if (err) return res.status(403).json({ message: 'Forbidden' });
+            if (err) return res.status(403).json({ message: 'Không có quyền truy cập' });
             req.user = user;
-            req.user.id = userId; // Ensure userId is added to the request
+            req.user.id = userId; // Đảm bảo userId được thêm vào yêu cầu
             next();
         });
     } catch (error) {
-        res.status(403).json({ message: 'Forbidden' });
+        res.status(403).json({ message: 'Không có quyền truy cập' });
     }
 };
 
@@ -48,7 +48,7 @@ const checkIsAdmin = async (req, res, next) => {
         if (req.user && req.user.role === 'admin') {
             return next();
         }
-        res.status(403).send({ message: 'Forbidden' });
+        res.status(403).send({ message: 'Không có quyền truy cập' });
     } catch (error) {
         next(error);
     }
@@ -63,11 +63,11 @@ const checkOwnership = (model, idField) => {
             const item = await model.findById(itemId).lean();
 
             if (!item) {
-                throw new AuthError("Item not found!");
+                throw new AuthError("Không tìm thấy tài nguyên!");
             }
 
             if (item.user.toString() !== userId && req.user.role !== 'admin') {
-                throw new AuthError("Unauthorized access!");
+                throw new AuthError("Không có quyền truy cập!");
             }
 
             next();
