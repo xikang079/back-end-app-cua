@@ -323,7 +323,7 @@ class CrabPurchaseService {
             return { details: [], totalAmount: 0 };
         }
 
-        console.log('Fetched Daily Summary from Server:', dailySummary); // Debugging print statement
+        // console.log('Fetched Daily Summary from Server:', dailySummary); // Debugging print statement
 
         return dailySummary;
     }
@@ -356,6 +356,12 @@ class CrabPurchaseService {
             .limit(limit)
             .lean();
         return dailySummaries;
+    }
+
+    static async deleteDailySummary(depotId, summaryId) {
+        const dailySummary = await DailySummary.findOneAndDelete({ _id: summaryId, depot: depotId }).lean();
+        if (!dailySummary) throw new AuthError("Xóa báo cáo tổng hợp thất bại!");
+        return dailySummary;
     }
 }
 

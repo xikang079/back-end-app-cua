@@ -26,4 +26,7 @@ router.get('/depot/:depotId/summaries', checkAuthentication, asyncHandle(CrabPur
 router.get('/summaries/all', checkAuthentication, checkIsAdmin, asyncHandle(CrabPurchaseController.getAllDailySummariesForAdmin));
 router.get('/summaries/date/:date', checkAuthentication, checkIsAdmin, asyncHandle(CrabPurchaseController.getDailySummariesByDateForAdmin));
 
+// Route mới để xóa báo cáo cuối ngày
+router.delete('/depot/:depotId/summary/:summaryId', checkAuthentication, asyncHandle(CrabPurchaseController.deleteDailySummary));
+
 module.exports = router;

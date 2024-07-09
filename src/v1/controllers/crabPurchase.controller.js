@@ -130,6 +130,14 @@ class CrabPurchaseController {
             metadata: await CrabPurchaseService.getDailySummariesByDateForAdmin(date, page, limit),
         }).sendData(res);
     }
+
+    static async deleteDailySummary(req, res, next) {
+        const { depotId, summaryId } = req.params;
+        await CrabPurchaseService.deleteDailySummary(depotId, summaryId);
+        new OK({
+            message: "Xóa báo cáo tổng hợp thành công!",
+        }).sendData(res);
+    }
 }
 
 module.exports = CrabPurchaseController;
