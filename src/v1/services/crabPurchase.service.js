@@ -359,8 +359,18 @@ class CrabPurchaseService {
     }
 
     static async deleteDailySummary(depotId, summaryId) {
-        const dailySummary = await DailySummary.findOneAndDelete({ _id: summaryId, depot: depotId }).lean();
+        const dailySummary = await DailySummary.findOne({ _id: summaryId, depot: depotId }).lean();
         if (!dailySummary) throw new AuthError("Xóa báo cáo tổng hợp thất bại!");
+
+        const now = moment.tz('Asia/Ho_Chi_Minh');
+        const summaryDate = moment(dailySummary.createdAt);
+        const diffDays = now.diff(summaryDate, 'days');
+
+        if (diffDays > 2) {
+            throw new AuthError("Không thể xóa báo cáo tổng hợp quá 2 ngày!");
+        }
+
+        await DailySummary.findOneAndDelete({ _id: summaryId, depot: depotId });
         return dailySummary;
     }
 }

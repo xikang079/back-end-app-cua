@@ -133,10 +133,14 @@ class CrabPurchaseController {
 
     static async deleteDailySummary(req, res, next) {
         const { depotId, summaryId } = req.params;
-        await CrabPurchaseService.deleteDailySummary(depotId, summaryId);
-        new OK({
-            message: "Xóa báo cáo tổng hợp thành công!",
-        }).sendData(res);
+        try {
+            await CrabPurchaseService.deleteDailySummary(depotId, summaryId);
+            new OK({
+                message: "Xóa báo cáo tổng hợp thành công!",
+            }).sendData(res);
+        } catch (error) {
+            next(error);
+        }
     }
 }
 
