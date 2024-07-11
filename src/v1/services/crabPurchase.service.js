@@ -363,10 +363,10 @@ class CrabPurchaseService {
         if (!dailySummary) throw new AuthError("Xóa báo cáo tổng hợp thất bại!");
 
         const now = moment.tz('Asia/Ho_Chi_Minh');
-        const summaryDate = moment(dailySummary.createdAt);
+        const summaryDate = moment.tz(dailySummary.createdAt, 'Asia/Ho_Chi_Minh');
         const diffDays = now.diff(summaryDate, 'days');
 
-        if (diffDays > 2) {
+        if (diffDays > 1) {
             throw new AuthError("Không thể xóa báo cáo tổng hợp quá 2 ngày!");
         }
 
