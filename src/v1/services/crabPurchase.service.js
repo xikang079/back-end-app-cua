@@ -162,10 +162,10 @@ class CrabPurchaseService {
         return crabPurchases;
     }
 
-    static async getCrabPurchasesByDepotAndMonth(depotId, month, year, page = 1, limit = 10, user) {
-        if (user.id !== depotId && user.role !== 'admin') {
-            throw new AuthError("Không có quyền truy cập!");
-        }
+    static async getCrabPurchasesByDepotAndMonth(depotId, month, year, page = 1, limit = 40, user) {
+        // if (user.id !== depotId && user.role !== 'admin') {
+        //     throw new AuthError("Không có quyền truy cập!");
+        // }
         const crabPurchases = await CrabPurchase.find({
             user: depotId,
             createdAt: {
@@ -182,6 +182,7 @@ class CrabPurchaseService {
             .lean();
         return crabPurchases;
     }
+    
 
     static async getCrabPurchasesByDepotAndYear(depotId, year, page = 1, limit = 10, user) {
         if (user.id !== depotId && user.role !== 'admin') {

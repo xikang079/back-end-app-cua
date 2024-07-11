@@ -65,7 +65,7 @@ class CrabPurchaseController {
 
     static async getCrabPurchasesByDepotAndMonth(req, res, next) {
         const { depotId, month, year } = req.params;
-        const { page = 1, limit = 10 } = req.query;
+        const { page = 1, limit = 40 } = req.query;
         new OK({
             message: "Lấy hoá đơn mua cua theo tháng thành công!",
             metadata: await CrabPurchaseService.getCrabPurchasesByDepotAndMonth(depotId, month, year, page, limit, req.user),
