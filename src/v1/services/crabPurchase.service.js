@@ -122,18 +122,10 @@ class CrabPurchaseService {
         if (user.id !== depotId && user.role !== 'admin') {
             throw new AuthError("Không có quyền truy cập!");
         }
-    
-        const startHour = 6; // 6h sáng
-        const dateMoment = moment.tz(date, 'Asia/Ho_Chi_Minh');
-        let todayStart = dateMoment.startOf('day').add(startHour, 'hours');
-        let tomorrowStart = todayStart.clone().add(1, 'day');
-    
-        // Nếu giờ hiện tại trước 6h sáng, thì bắt đầu từ 6h sáng ngày hôm trước
-        if (moment.tz('Asia/Ho_Chi_Minh').hour() < startHour) {
-            todayStart = todayStart.subtract(1, 'day');
-            tomorrowStart = tomorrowStart.subtract(1, 'day');
-        }
-    
+
+        const todayStart = moment.tz(date, 'Asia/Ho_Chi_Minh').startOf('day').add(6, 'hours');
+        const tomorrowStart = todayStart.clone().add(1, 'day');
+
         const crabPurchases = await CrabPurchase.find({
             user: depotId,
             createdAt: {
@@ -141,14 +133,14 @@ class CrabPurchaseService {
                 $lt: tomorrowStart.toDate(),
             },
         })
-        .populate({
-            path: 'trader crabs.crabType',
-            match: { isDeleted: { $ne: true } }
-        })
-        .skip((page - 1) * limit)
-        .limit(limit)
-        .lean();
-    
+            .populate({
+                path: 'trader crabs.crabType',
+                match: { isDeleted: { $ne: true } }
+            })
+            .skip((page - 1) * limit)
+            .limit(limit)
+            .lean();
+
         return crabPurchases;
     }
 
@@ -190,7 +182,7 @@ class CrabPurchaseService {
             .lean();
         return crabPurchases;
     }
-
+    
 
     static async getCrabPurchasesByDepotAndYear(depotId, year, page = 1, limit = 10, user) {
         if (user.id !== depotId && user.role !== 'admin') {
@@ -243,15 +235,14 @@ class CrabPurchaseService {
     }
 
     // Controller method on the server
-    // Controller method on the server
     static async createDailySummaryByDepotToday(depotId, user, startHour = 6, endHour = 6) {
         if (user.id !== depotId && user.role !== 'admin') {
             throw new AuthError("Không có quyền truy cập!");
         }
 
         const now = moment.tz('Asia/Ho_Chi_Minh');
-        const todayStart = now.clone().startOf('day').subtract(1, 'day').add(startHour, 'hours');
-        const tomorrowEnd = todayStart.clone().add(1, 'day').add(24, 'hours');
+        const todayStart = now.clone().startOf('day').add(startHour, 'hours');
+        const tomorrowStart = todayStart.clone().add(1, 'day');
 
         const depotObjectId = mongoose.Types.ObjectId.createFromHexString(depotId);
 
@@ -259,7 +250,7 @@ class CrabPurchaseService {
             depot: depotObjectId,
             createdAt: {
                 $gte: todayStart.toDate(),
-                $lt: tomorrowEnd.toDate(),
+                $lt: tomorrowStart.toDate(),
             }
         }).lean();
 
@@ -271,7 +262,7 @@ class CrabPurchaseService {
             user: depotObjectId,
             createdAt: {
                 $gte: todayStart.toDate(),
-                $lt: tomorrowEnd.toDate(),
+                $lt: tomorrowStart.toDate(),
             }
         }).lean();
 
@@ -311,6 +302,7 @@ class CrabPurchaseService {
         return dailySummary;
     }
 
+
     static async getDailySummaryByDepotToday(depotId, user) {
         if (user.id !== depotId && user.role !== 'admin') {
             throw new AuthError("Không có quyền truy cập!");
@@ -328,7 +320,7 @@ class CrabPurchaseService {
         }).lean();
 
         if (!dailySummary) {
-            // console.log('Không tìm thấy báo cáo tổng hợp cho hôm nay.');
+            console.log('Không tìm thấy báo cáo tổng hợp cho hôm nay.');
             return { details: [], totalAmount: 0 };
         }
 

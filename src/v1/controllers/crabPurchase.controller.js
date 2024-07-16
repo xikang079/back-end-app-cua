@@ -48,16 +48,11 @@ class CrabPurchaseController {
     static async getCrabPurchasesByDepotAndDate(req, res, next) {
         const { depotId, date } = req.params;
         const { page = 1, limit = 100 } = req.query;
-        try {
-            const metadata = await CrabPurchaseService.getCrabPurchasesByDepotAndDate(depotId, date, page, limit, req.user);
-            return res.status(200).json({
-                message: "Lấy hoá đơn mua cua theo ngày thành công!",
-                metadata,
-            });
-        } catch (error) {
-            next(error);
-        }
-    }  
+        new OK({
+            message: "Lấy hoá đơn mua cua theo ngày thành công!",
+            metadata: await CrabPurchaseService.getCrabPurchasesByDepotAndDate(depotId, date, page, limit, req.user),
+        }).sendData(res);
+    }    
 
     static async getCrabPurchasesByDepotAndTrader(req, res, next) {
         const { depotId, traderId } = req.params;
