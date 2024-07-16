@@ -123,9 +123,16 @@ class CrabPurchaseService {
             throw new AuthError("Không có quyền truy cập!");
         }
     
-        const startHour = 6;  
-        const todayStart = moment.tz(date, 'Asia/Ho_Chi_Minh').startOf('day').add(startHour, 'hours');
-        const tomorrowStart = todayStart.clone().add(1, 'day');
+        const startHour = 6; // 6h sáng
+        const dateMoment = moment.tz(date, 'Asia/Ho_Chi_Minh');
+        let todayStart = dateMoment.startOf('day').add(startHour, 'hours');
+        let tomorrowStart = todayStart.clone().add(1, 'day');
+    
+        // Nếu giờ hiện tại trước 6h sáng, thì bắt đầu từ 6h sáng ngày hôm trước
+        if (moment().hour() < startHour) {
+            todayStart = todayStart.subtract(1, 'day');
+            tomorrowStart = tomorrowStart.subtract(1, 'day');
+        }
     
         const crabPurchases = await CrabPurchase.find({
             user: depotId,
@@ -134,17 +141,16 @@ class CrabPurchaseService {
                 $lt: tomorrowStart.toDate(),
             },
         })
-            .populate({
-                path: 'trader crabs.crabType',
-                match: { isDeleted: { $ne: true } }
-            })
-            .skip((page - 1) * limit)
-            .limit(limit)
-            .lean();
+        .populate({
+            path: 'trader crabs.crabType',
+            match: { isDeleted: { $ne: true } }
+        })
+        .skip((page - 1) * limit)
+        .limit(limit)
+        .lean();
     
         return crabPurchases;
     }
-
     static async getCrabPurchasesByDepotAndTrader(depotId, traderId, page = 1, limit = 10, user) {
         if (user.id !== depotId && user.role !== 'admin') {
             throw new AuthError("Không có quyền truy cập!");
