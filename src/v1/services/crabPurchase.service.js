@@ -129,7 +129,7 @@ class CrabPurchaseService {
         let tomorrowStart = todayStart.clone().add(1, 'day');
     
         // Nếu giờ hiện tại trước 6h sáng, thì bắt đầu từ 6h sáng ngày hôm trước
-        if (moment().hour() < startHour) {
+        if (moment.tz('Asia/Ho_Chi_Minh').hour() < startHour) {
             todayStart = todayStart.subtract(1, 'day');
             tomorrowStart = tomorrowStart.subtract(1, 'day');
         }
@@ -151,6 +151,7 @@ class CrabPurchaseService {
     
         return crabPurchases;
     }
+
     static async getCrabPurchasesByDepotAndTrader(depotId, traderId, page = 1, limit = 10, user) {
         if (user.id !== depotId && user.role !== 'admin') {
             throw new AuthError("Không có quyền truy cập!");
