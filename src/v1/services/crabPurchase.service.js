@@ -122,10 +122,11 @@ class CrabPurchaseService {
         if (user.id !== depotId && user.role !== 'admin') {
             throw new AuthError("Không có quyền truy cập!");
         }
-
-        const todayStart = moment.tz(date, 'Asia/Ho_Chi_Minh').startOf('day').add(6, 'hours');
+    
+        const startHour = 6;  
+        const todayStart = moment.tz(date, 'Asia/Ho_Chi_Minh').startOf('day').add(startHour, 'hours');
         const tomorrowStart = todayStart.clone().add(1, 'day');
-
+    
         const crabPurchases = await CrabPurchase.find({
             user: depotId,
             createdAt: {
@@ -140,7 +141,7 @@ class CrabPurchaseService {
             .skip((page - 1) * limit)
             .limit(limit)
             .lean();
-
+    
         return crabPurchases;
     }
 
@@ -320,7 +321,7 @@ class CrabPurchaseService {
         }).lean();
 
         if (!dailySummary) {
-            console.log('Không tìm thấy báo cáo tổng hợp cho hôm nay.');
+            // console.log('Không tìm thấy báo cáo tổng hợp cho hôm nay.');
             return { details: [], totalAmount: 0 };
         }
 
