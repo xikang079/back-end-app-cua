@@ -234,6 +234,24 @@ class CrabPurchaseService {
         return crabPurchases;
     }
 
+    static async getCrabPurchasesByDateRange(depotId, startDate, endDate) {
+        const start = moment.tz(startDate, 'Asia/Ho_Chi_Minh').toDate();
+        const end = moment.tz(endDate, 'Asia/Ho_Chi_Minh').toDate();
+
+        const purchases = await CrabPurchase.find({
+            user: depotId,
+            createdAt: {
+                $gte: start,
+                $lt: end,
+            },
+        }).populate({
+            path: 'trader crabs.crabType',
+            match: { isDeleted: { $ne: true } },
+        }).lean();
+
+        return purchases;
+    }
+
     // Controller method on the server
     static async createDailySummaryByDepotToday(depotId, user, startHour = 6, endHour = 6) {
         if (user.id !== depotId && user.role !== 'admin') {

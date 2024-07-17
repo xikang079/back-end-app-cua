@@ -29,4 +29,7 @@ router.get('/summaries/date/:date', checkAuthentication, checkIsAdmin, asyncHand
 // Route mới để xóa báo cáo cuối ngày
 router.delete('/depot/:depotId/summary/:summaryId', checkAuthentication, asyncHandle(CrabPurchaseController.deleteDailySummary));
 
+// Route mới để lấy hoá đơn theo khoảng thời gian
+router.get('/depot/:depotId/date-range', checkAuthentication, asyncHandle(CrabPurchaseController.getCrabPurchasesByDateRange));
+
 module.exports = router;

@@ -54,6 +54,20 @@ class CrabPurchaseController {
         }).sendData(res);
     }    
 
+    static async getCrabPurchasesByDateRange(req, res, next) {
+        try {
+            const { depotId } = req.params;
+            const { startDate, endDate } = req.query;
+            const purchases = await CrabPurchaseService.getCrabPurchasesByDateRange(depotId, startDate, endDate);
+            new OK({
+                message: "Lấy hoá đơn mua cua theo khoảng thời gian thành công!",
+                metadata: purchases,
+            }).sendData(res);
+        } catch (error) {
+            next(error);
+        }
+    }
+
     static async getCrabPurchasesByDepotAndTrader(req, res, next) {
         const { depotId, traderId } = req.params;
         const { page = 1, limit = 10 } = req.query;
