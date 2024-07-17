@@ -293,50 +293,41 @@ class CrabPurchaseService {
   }
 
   // Controller method on the server
-  static async createDailySummaryByDepotToday(
-    depotId,
-    user,
-    startHour = 6,
-    endHour = 6
-  ) {
+  static async createDailySummaryByDepotToday(depotId, startDate, endDate, user) {
     if (user.id !== depotId && user.role !== "admin") {
       throw new AuthError("Không có quyền truy cập!");
     }
-
-    const now = moment.tz("Asia/Ho_Chi_Minh");
-    const todayStart = now.clone().startOf("day").add(startHour, "hours");
-    const tomorrowStart = todayStart.clone().add(1, "day");
-
+  
     const depotObjectId = mongoose.Types.ObjectId.createFromHexString(depotId);
-
+  
     const existingSummary = await DailySummary.findOne({
       depot: depotObjectId,
       createdAt: {
-        $gte: todayStart.toDate(),
-        $lt: tomorrowStart.toDate(),
+        $gte: startDate,
+        $lt: endDate,
       },
     }).lean();
-
+  
     if (existingSummary) {
       throw new AuthError(
         "Báo cáo tổng hợp cho ngày hôm nay đã tồn tại. Vui lòng xoá báo cáo hiện tại trước khi tạo mới."
       );
     }
-
+  
     const crabPurchases = await CrabPurchase.find({
       user: depotObjectId,
       createdAt: {
-        $gte: todayStart.toDate(),
-        $lt: tomorrowStart.toDate(),
+        $gte: startDate,
+        $lt: endDate,
       },
     }).lean();
-
+  
     if (crabPurchases.length === 0) {
       return { details: [], totalAmount: 0 };
     }
-
+  
     const summaryMap = new Map();
-
+  
     crabPurchases.forEach((purchase) => {
       purchase.crabs.forEach((crab) => {
         const crabTypeId = crab.crabType.toString();
@@ -352,24 +343,22 @@ class CrabPurchaseService {
         summary.totalCost += crab.totalCost;
       });
     });
-
+  
     const summaryDetails = Array.from(summaryMap.values());
     const totalAmount = summaryDetails.reduce(
       (acc, detail) => acc + detail.totalCost,
       0
     );
-
+  
     const dailySummary = await DailySummary.create({
       depot: depotObjectId,
       details: summaryDetails,
       totalAmount,
     });
-
-    // console.log("Created Daily Summary:", dailySummary); // Add this line to debug
-
+  
     return dailySummary;
   }
-
+  
   static async getDailySummaryByDepotToday(depotId, user) {
     if (user.id !== depotId && user.role !== "admin") {
       throw new AuthError("Không có quyền truy cập!");

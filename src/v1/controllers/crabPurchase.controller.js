@@ -109,11 +109,13 @@ class CrabPurchaseController {
 
     static async createDailySummaryByDepotToday(req, res, next) {
         const depotId = req.params.depotId;
+        const { startDate, endDate } = req.body;
         new CREATED({
-            message: "Tạo báo cáo tổng hợp trong ngày cho vựa thành công!",
-            metadata: await CrabPurchaseService.createDailySummaryByDepotToday(depotId, req.user),
+          message: "Tạo báo cáo tổng hợp trong ngày cho vựa thành công!",
+          metadata: await CrabPurchaseService.createDailySummaryByDepotToday(depotId, startDate, endDate, req.user),
         }).sendData(res);
-    }
+      }
+      
 
     static async getDailySummaryByDepotToday(req, res, next) {
         const depotId = req.params.depotId;
