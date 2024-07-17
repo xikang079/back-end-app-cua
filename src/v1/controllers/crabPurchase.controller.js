@@ -119,9 +119,10 @@ class CrabPurchaseController {
 
     static async getDailySummaryByDepotToday(req, res, next) {
         const depotId = req.params.depotId;
+        const { startDate, endDate } = req.body;
         new OK({
             message: "Lấy báo cáo tổng hợp trong ngày cho vựa thành công!",
-            metadata: await CrabPurchaseService.getDailySummaryByDepotToday(depotId, req.user),
+            metadata: await CrabPurchaseService.getDailySummaryByDepotToday(depotId, startDate, endDate, req.user),
         }).sendData(res);
     }
 

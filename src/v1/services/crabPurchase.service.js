@@ -359,17 +359,26 @@ class CrabPurchaseService {
     return dailySummary;
   }
   
-  static async getDailySummaryByDepotToday(depotId, user) {
+  static async getDailySummaryByDepotToday(depotId, startDate, endDate, user) {
     if (user.id !== depotId && user.role !== "admin") {
       throw new AuthError("Không có quyền truy cập!");
     }
-
-    const todayStart = moment
-      .tz("Asia/Ho_Chi_Minh")
-      .startOf("day")
-      .add(6, "hours");
-    const todayEnd = todayStart.clone().add(1, "day");
-
+  
+    // Get current time in Ho Chi Minh timezone
+    const now = moment().tz("Asia/Ho_Chi_Minh");
+  
+    // Determine the start and end of the current day based on the current time
+    let todayStart, todayEnd;
+    if (now.hour() < 6) {
+      // If before 6 AM, consider it as part of the previous day
+      todayStart = now.clone().subtract(1, 'day').startOf('day').add(6, 'hours');
+      todayEnd = now.clone().startOf('day').add(6, 'hours');
+    } else {
+      // Otherwise, it's part of the current day
+      todayStart = now.clone().startOf('day').add(6, 'hours');
+      todayEnd = now.clone().add(1, 'day').startOf('day').add(6, 'hours');
+    }
+  
     const dailySummary = await DailySummary.findOne({
       depot: depotId,
       createdAt: {
@@ -377,14 +386,14 @@ class CrabPurchaseService {
         $lt: todayEnd.toDate(),
       },
     }).lean();
-
+  
     if (!dailySummary) {
       console.log("Không tìm thấy báo cáo tổng hợp cho hôm nay.");
       return { details: [], totalAmount: 0 };
     }
-
+  
     // console.log('Fetched Daily Summary from Server:', dailySummary); // Debugging print statement
-
+  
     return dailySummary;
   }
 
