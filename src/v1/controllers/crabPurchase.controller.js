@@ -67,6 +67,7 @@ class CrabPurchaseController {
             next(error);
         }
     }
+    
 
     static async getCrabPurchasesByDepotAndTrader(req, res, next) {
         const { depotId, traderId } = req.params;

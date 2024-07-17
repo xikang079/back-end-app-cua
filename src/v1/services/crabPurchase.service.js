@@ -16,7 +16,6 @@ class CrabPurchaseService {
             const crabType = await CrabType.findOne({ _id: crab.crabType, isDeleted: false });
             if (!crabType) throw new AuthError("Không tìm thấy loại cua!");
 
-            // Kiểm tra xem crabType có thuộc vựa của người dùng hiện tại không
             if (crabType.user.toString() !== userId) {
                 throw new AuthError("Không có quyền truy cập vào loại cua này");
             }
@@ -31,7 +30,6 @@ class CrabPurchaseService {
 
         const totalCost = crabs.reduce((acc, crab) => acc + crab.totalCost, 0);
 
-        // Sử dụng moment-timezone để lấy thời gian hiện tại theo múi giờ Việt Nam
         const createdAt = moment.tz('Asia/Ho_Chi_Minh').toDate();
 
         const crabPurchase = await CrabPurchase.create({
@@ -39,7 +37,7 @@ class CrabPurchaseService {
             crabs,
             totalCost,
             user: userId,
-            createdAt: createdAt // Lưu thời gian tạo hóa đơn
+            createdAt: createdAt
         });
 
         if (!crabPurchase) throw new AuthError("Tạo hoá đơn mua cua thất bại!");
@@ -235,9 +233,9 @@ class CrabPurchaseService {
     }
 
     static async getCrabPurchasesByDateRange(depotId, startDate, endDate) {
-        const start = moment.tz(startDate, 'Asia/Ho_Chi_Minh').toDate();
-        const end = moment.tz(endDate, 'Asia/Ho_Chi_Minh').toDate();
-
+        const start = moment.tz(startDate, 'Asia/Ho_Chi_Minh').startOf('day').add(6, 'hours').toDate();
+        const end = moment.tz(endDate, 'Asia/Ho_Chi_Minh').startOf('day').add(6, 'hours').add(1, 'day').toDate();
+    
         const purchases = await CrabPurchase.find({
             user: depotId,
             createdAt: {
@@ -248,9 +246,10 @@ class CrabPurchaseService {
             path: 'trader crabs.crabType',
             match: { isDeleted: { $ne: true } },
         }).lean();
-
+    
         return purchases;
     }
+    
 
     // Controller method on the server
     static async createDailySummaryByDepotToday(depotId, user, startHour = 6, endHour = 6) {
