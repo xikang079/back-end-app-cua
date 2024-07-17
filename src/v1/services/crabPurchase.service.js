@@ -236,6 +236,8 @@ class CrabPurchaseService {
         const start = moment.tz(startDate, 'Asia/Ho_Chi_Minh').startOf('day').add(6, 'hours').toDate();
         const end = moment.tz(endDate, 'Asia/Ho_Chi_Minh').startOf('day').add(6, 'hours').add(1, 'day').toDate();
     
+        console.log(`Fetching crab purchases from ${start} to ${end}`); // Add this line for debugging
+    
         const purchases = await CrabPurchase.find({
             user: depotId,
             createdAt: {
@@ -247,8 +249,11 @@ class CrabPurchaseService {
             match: { isDeleted: { $ne: true } },
         }).lean();
     
+        console.log(`Found ${purchases.length} purchases`); // Add this line for debugging
+    
         return purchases;
     }
+    
     
 
     // Controller method on the server
