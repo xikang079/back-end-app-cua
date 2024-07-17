@@ -233,11 +233,9 @@ class CrabPurchaseService {
     }
 
     static async getCrabPurchasesByDateRange(depotId, startDate, endDate) {
-        const start = moment.tz(startDate, 'Asia/Ho_Chi_Minh').startOf('day').add(6, 'hours').toDate();
-        const end = moment.tz(endDate, 'Asia/Ho_Chi_Minh').startOf('day').add(6, 'hours').add(1, 'day').toDate();
-    
-        console.log(`Fetching crab purchases from ${start} to ${end}`); // Add this line for debugging
-    
+        const start = moment.tz(startDate, 'Asia/Ho_Chi_Minh').toDate();
+        const end = moment.tz(endDate, 'Asia/Ho_Chi_Minh').toDate();
+
         const purchases = await CrabPurchase.find({
             user: depotId,
             createdAt: {
@@ -248,9 +246,7 @@ class CrabPurchaseService {
             path: 'trader crabs.crabType',
             match: { isDeleted: { $ne: true } },
         }).lean();
-    
-        console.log(`Found ${purchases.length} purchases`); // Add this line for debugging
-    
+
         return purchases;
     }
     
