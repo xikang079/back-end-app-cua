@@ -58,7 +58,9 @@ class CrabPurchaseController {
         try {
             const { depotId } = req.params;
             const { startDate, endDate } = req.query;
+            console.log(`Fetching crab purchases from ${startDate} to ${endDate}`); // Debug
             const purchases = await CrabPurchaseService.getCrabPurchasesByDateRange(depotId, startDate, endDate);
+            console.log(`Found ${purchases.length} purchases`); // Debug
             new OK({
                 message: "Lấy hoá đơn mua cua theo khoảng thời gian thành công!",
                 metadata: purchases,
@@ -67,6 +69,7 @@ class CrabPurchaseController {
             next(error);
         }
     }
+    
     
 
     static async getCrabPurchasesByDepotAndTrader(req, res, next) {
