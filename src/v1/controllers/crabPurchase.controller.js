@@ -163,6 +163,16 @@ class CrabPurchaseController {
             next(error);
         }
     }
+
+    static async getDailySummariesByDepotAndMonth(req, res, next) {
+        const { depotId, month, year } = req.params;
+        const { page = 1, limit = 50 } = req.query;
+        new OK({
+            message: "Lấy báo cáo tổng hợp theo tháng thành công!",
+            metadata: await CrabPurchaseService.getDailySummariesByDepotAndMonth(depotId, month, year, page, limit, req.user),
+        }).sendData(res);
+    }
+    
 }
 
 module.exports = CrabPurchaseController;

@@ -32,4 +32,7 @@ router.delete('/depot/:depotId/summary/:summaryId', checkAuthentication, asyncHa
 // Route mới để lấy hoá đơn theo khoảng thời gian
 router.get('/depot/:depotId/date-range', checkAuthentication, asyncHandle(CrabPurchaseController.getCrabPurchasesByDateRange));
 
+// Route mới để lấy summaries theo tháng
+router.get('/depot/:depotId/summaries/month/:month/year/:year', checkAuthentication, asyncHandle(CrabPurchaseController.getDailySummariesByDepotAndMonth));
+
 module.exports = router;
