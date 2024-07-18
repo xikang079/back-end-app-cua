@@ -447,24 +447,26 @@ class CrabPurchaseService {
 
   static async getDailySummariesByDepotAndMonth(depotId, month, year, page = 1, limit = 50, user) {
     if (user.id !== depotId && user.role !== "admin") {
-      throw new AuthError("Không có quyền truy cập!");
+        throw new AuthError("Không có quyền truy cập!");
     }
 
-    const startDate = moment.tz(`${year}-${month}-01`, "Asia/Ho_Chi_Minh").startOf('month').toDate();
+    const startDate = moment.tz(`${year}-${String(month).padStart(2, '0')}-01`, "YYYY-MM-DD", "Asia/Ho_Chi_Minh").startOf('month').toDate();
     const endDate = moment.tz(startDate, "Asia/Ho_Chi_Minh").endOf('month').toDate();
 
     const dailySummaries = await DailySummary.find({
-      depot: depotId,
-      createdAt: {
-        $gte: startDate,
-        $lt: endDate,
-      },
+        depot: depotId,
+        createdAt: {
+            $gte: startDate,
+            $lt: endDate,
+        },
     })
-      .skip((page - 1) * limit)
-      .limit(limit)
-      .lean();
+    .skip((page - 1) * limit)
+    .limit(limit)
+    .lean();
+    
     return dailySummaries;
-  }
+}
+
 
 }
 
