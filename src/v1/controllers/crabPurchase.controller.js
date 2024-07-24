@@ -12,7 +12,7 @@ class CrabPurchaseController {
 
     static async getAllCrabPurchases(req, res, next) {
         const userId = req.user.id;
-        const { page = 1, limit = 10 } = req.query;
+        const { page = 1, limit = 100 } = req.query;
 
         const crabPurchases = await CrabPurchaseService.getAllCrabPurchases(userId, page, limit);
         new OK({
@@ -48,11 +48,12 @@ class CrabPurchaseController {
     static async getCrabPurchasesByDepotAndDate(req, res, next) {
         const { depotId, date } = req.params;
         const { page = 1, limit = 100 } = req.query;
+    
         new OK({
-            message: "Lấy hoá đơn mua cua theo ngày thành công!",
-            metadata: await CrabPurchaseService.getCrabPurchasesByDepotAndDate(depotId, date, page, limit, req.user),
+          message: "Lấy hoá đơn mua cua theo ngày thành công!",
+          metadata: await CrabPurchaseService.getCrabPurchasesByDepotAndDate(depotId, date, page, limit, req.user),
         }).sendData(res);
-    }    
+      }  
 
     static async getCrabPurchasesByDateRange(req, res, next) {
         try {
@@ -170,6 +171,16 @@ class CrabPurchaseController {
         new OK({
             message: "Lấy báo cáo tổng hợp theo tháng thành công!",
             metadata: await CrabPurchaseService.getDailySummariesByDepotAndMonth(depotId, month, year, page, limit, req.user),
+        }).sendData(res);
+    }
+
+    static async getTodayCrabPurchasesForDepot(req, res, next) {
+        const { depotId } = req.params;
+        const { page = 1, limit = 100 } = req.query;
+    
+        new OK({
+            message: "Lấy tất cả hóa đơn mua cua trong ngày theo vựa thành công!",
+            metadata: await CrabPurchaseService.getTodayCrabPurchasesForDepot(depotId, page, limit),
         }).sendData(res);
     }
     

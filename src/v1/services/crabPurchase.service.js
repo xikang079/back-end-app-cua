@@ -50,7 +50,7 @@ class CrabPurchaseService {
     return { crabPurchase };
   }
 
-  static async getAllCrabPurchases(userId, page = 1, limit = 10) {
+  static async getAllCrabPurchases(userId, page = 1, limit = 100) {
     const crabPurchases = await CrabPurchase.find({ user: userId })
       .skip((page - 1) * limit)
       .limit(Number(limit))
@@ -140,17 +140,14 @@ class CrabPurchaseService {
       throw new AuthError("Không có quyền truy cập!");
     }
 
-    const todayStart = moment
-      .tz(date, "Asia/Ho_Chi_Minh")
-      .startOf("day")
-      .add(6, "hours");
-    const tomorrowStart = todayStart.clone().add(1, "day");
+    const startOfDay = moment.tz(date, "Asia/Ho_Chi_Minh").startOf('day').add(6, 'hours');
+    const endOfDay = startOfDay.clone().add(1, 'day');
 
     const crabPurchases = await CrabPurchase.find({
       user: depotId,
       createdAt: {
-        $gte: todayStart.toDate(),
-        $lt: tomorrowStart.toDate(),
+        $gte: startOfDay.toDate(),
+        $lt: endOfDay.toDate(),
       },
     })
       .populate({
@@ -447,26 +444,47 @@ class CrabPurchaseService {
 
   static async getDailySummariesByDepotAndMonth(depotId, month, year, page = 1, limit = 50, user) {
     if (user.id !== depotId && user.role !== "admin") {
-        throw new AuthError("Không có quyền truy cập!");
+      throw new AuthError("Không có quyền truy cập!");
     }
 
     const startDate = moment.tz(`${year}-${String(month).padStart(2, '0')}-01`, "YYYY-MM-DD", "Asia/Ho_Chi_Minh").startOf('month').toDate();
     const endDate = moment.tz(startDate, "Asia/Ho_Chi_Minh").endOf('month').toDate();
 
     const dailySummaries = await DailySummary.find({
-        depot: depotId,
-        createdAt: {
-            $gte: startDate,
-            $lt: endDate,
-        },
+      depot: depotId,
+      createdAt: {
+        $gte: startDate,
+        $lt: endDate,
+      },
     })
-    .skip((page - 1) * limit)
-    .limit(limit)
-    .lean();
-    
-    return dailySummaries;
-}
+      .skip((page - 1) * limit)
+      .limit(limit)
+      .lean();
 
+    return dailySummaries;
+  }
+
+  static async getTodayCrabPurchasesForDepot(depotId, page = 1, limit = 100) {
+    const startDate = moment().tz("Asia/Ho_Chi_Minh").startOf('day').add(6, 'hours').toDate();
+    const endDate = moment().tz("Asia/Ho_Chi_Minh").endOf('day').add(6, 'hours').toDate();
+
+    const crabPurchases = await CrabPurchase.find({
+      user: depotId,
+      createdAt: {
+        $gte: startDate,
+        $lt: endDate,
+      },
+    })
+      .populate({
+        path: "trader crabs.crabType",
+        match: { isDeleted: { $ne: true } },
+      })
+      .skip((page - 1) * limit)
+      .limit(limit)
+      .lean();
+
+    return crabPurchases;
+  }
 
 }
 

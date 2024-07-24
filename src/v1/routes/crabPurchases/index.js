@@ -35,4 +35,10 @@ router.get('/depot/:depotId/date-range', checkAuthentication, asyncHandle(CrabPu
 // Route mới để lấy summaries theo tháng
 router.get('/depot/:depotId/summaries/month/:month/year/:year', checkAuthentication, asyncHandle(CrabPurchaseController.getDailySummariesByDepotAndMonth));
 
+// // Route mới để lấy hoá đơn theo khoảng thời gian và thương nhân
+// router.get('/depot/:depotId/date/:date', checkAuthentication, asyncHandle(CrabPurchaseController.getCrabPurchasesByDepotAndDate));
+
+// Route mới để lấy hoá đơn mua cua theo khoảng thời gian
+router.get('/admin/depot/:depotId/today', checkAuthentication, checkIsAdmin, asyncHandle(CrabPurchaseController.getTodayCrabPurchasesForDepot));
+
 module.exports = router;
