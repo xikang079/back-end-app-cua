@@ -39,6 +39,10 @@ class CrabTypeService {
 
             return { crabType };
         } catch (error) {
+            // Xử lý lỗi MongoDB duplicate key
+            if (error.code === 11000) {
+                throw new AuthError("Crab type name already exists for this depot!");
+            }
             logger.error(`Failed to create crab type: ${error.message}`);
             throw error;
         }

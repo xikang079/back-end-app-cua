@@ -8,7 +8,6 @@ const crabTypeSchema = new Schema({
         type: String,
         required: [true, 'Crab type name is required'],
         trim: true,
-        unique: true,
     },
     pricePerKg: {
         type: Number,
@@ -18,9 +17,11 @@ const crabTypeSchema = new Schema({
         type: Schema.Types.ObjectId,
         ref: 'User',
         required: true,
-        unique: true,
     },
-    isDeleted: { type: Boolean, default: false } // Thêm cờ đánh dấu
+    isDeleted: { 
+        type: Boolean, 
+        default: false 
+    }
 }, {
     timestamps: true,
     collection: COLLECTION_NAME,
