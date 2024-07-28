@@ -6,6 +6,7 @@ const DailySummary = require("../models/dailySummary.model");
 const { AuthError } = require("../core/error.response");
 const { log } = require("winston");
 const moment = require("moment-timezone");
+const axios = require('axios');
 
 class CrabPurchaseService {
   static async createCrabPurchase(userId, data) {
@@ -292,69 +293,105 @@ class CrabPurchaseService {
   // Controller method on the server
   static async createDailySummaryByDepotToday(depotId, startDate, endDate, user) {
     if (user.id !== depotId && user.role !== "admin") {
-      throw new AuthError("Không có quyền truy cập!");
+        throw new AuthError("Không có quyền truy cập!");
     }
 
     const depotObjectId = mongoose.Types.ObjectId.createFromHexString(depotId);
 
     const existingSummary = await DailySummary.findOne({
-      depot: depotObjectId,
-      createdAt: {
-        $gte: startDate,
-        $lt: endDate,
-      },
+        depot: depotObjectId,
+        createdAt: {
+            $gte: startDate,
+            $lt: endDate,
+        },
     }).lean();
 
     if (existingSummary) {
-      throw new AuthError(
-        "Báo cáo tổng hợp cho ngày hôm nay đã tồn tại. Vui lòng xoá báo cáo hiện tại trước khi tạo mới."
-      );
+        throw new AuthError(
+            "Báo cáo tổng hợp cho ngày hôm nay đã tồn tại. Vui lòng xoá báo cáo hiện tại trước khi tạo mới."
+        );
     }
 
     const crabPurchases = await CrabPurchase.find({
-      user: depotObjectId,
-      createdAt: {
-        $gte: startDate,
-        $lt: endDate,
-      },
+        user: depotObjectId,
+        createdAt: {
+            $gte: startDate,
+            $lt: endDate,
+        },
     }).lean();
 
     if (crabPurchases.length === 0) {
-      return { details: [], totalAmount: 0 };
+        return { details: [], totalAmount: 0 };
     }
 
     const summaryMap = new Map();
 
     crabPurchases.forEach((purchase) => {
-      purchase.crabs.forEach((crab) => {
-        const crabTypeId = crab.crabType.toString();
-        if (!summaryMap.has(crabTypeId)) {
-          summaryMap.set(crabTypeId, {
-            crabType: crab.crabType,
-            totalWeight: 0,
-            totalCost: 0,
-          });
-        }
-        const summary = summaryMap.get(crabTypeId);
-        summary.totalWeight += crab.weight;
-        summary.totalCost += crab.totalCost;
-      });
+        purchase.crabs.forEach((crab) => {
+            const crabTypeId = crab.crabType.toString();
+            if (!summaryMap.has(crabTypeId)) {
+                summaryMap.set(crabTypeId, {
+                    crabType: crab.crabType,
+                    totalWeight: 0,
+                    totalCost: 0,
+                });
+            }
+            const summary = summaryMap.get(crabTypeId);
+            summary.totalWeight += crab.weight;
+            summary.totalCost += crab.totalCost;
+        });
     });
 
     const summaryDetails = Array.from(summaryMap.values());
     const totalAmount = summaryDetails.reduce(
-      (acc, detail) => acc + detail.totalCost,
-      0
+        (acc, detail) => acc + detail.totalCost,
+        0
     );
 
     const dailySummary = await DailySummary.create({
-      depot: depotObjectId,
-      details: summaryDetails,
-      totalAmount,
+        depot: depotObjectId,
+        details: summaryDetails,
+        totalAmount,
     });
 
+    // Gửi báo cáo qua Zalo nếu tổng chi phí không phải 0
+    if (totalAmount > 0) {
+        await this.sendReportToZalo(dailySummary, user);
+    } else {
+        throw new AuthError("Chưa có hoá đơn nào được tạo để làm báo cáo.");
+    }
+
     return dailySummary;
-  }
+}
+
+static async sendReportToZalo(dailySummary, user) {
+    const accessToken = 'YOUR_ZALO_ACCESS_TOKEN'; // Thay thế bằng token của bạn
+    const recipientId = 'RECIPIENT_ID'; // ID của nhóm hoặc người nhận trên Zalo
+
+    const message = `Báo cáo tổng hợp ngày:
+    Tổng số tiền: ${dailySummary.totalAmount}
+    Chi tiết: ${dailySummary.details.map(detail => `Loại cua: ${detail.crabType}, Trọng lượng: ${detail.totalWeight}, Tổng chi phí: ${detail.totalCost}`).join('\n')}`;
+
+    try {
+        const response = await axios.post('https://openapi.zalo.me/v2.0/oa/message', {
+            recipient: {
+                user_id: recipientId
+            },
+            message: {
+                text: message
+            }
+        }, {
+            headers: {
+                'Content-Type': 'application/json',
+                'access_token': accessToken
+            }
+        });
+
+        console.log('Gửi báo cáo qua Zalo thành công:', response.data);
+    } catch (error) {
+        console.error('Lỗi khi gửi báo cáo qua Zalo:', error.response ? error.response.data : error.message);
+    }
+}
 
   static async getDailySummaryByDepotToday(depotId, startDate, endDate, user) {
     if (user.id !== depotId && user.role !== "admin") {

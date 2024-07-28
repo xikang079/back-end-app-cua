@@ -32,28 +32,30 @@ class AuthServices {
     static login = async ({ username, password }) => {
         const user = await User.findOne({ username: username }).lean();
         if (!user) throw new AuthError("User not found!");
-
+    
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) throw new AuthError("Password incorrect!", 400);
-
+    
         const publicKey = crypto.randomBytes(32).toString('hex');
         const privateKey = crypto.randomBytes(32).toString('hex');
-
-        const accessToken = jwt.sign({ id: user._id, role: user.role }, publicKey, { expiresIn: '1d' });
+    
+        // Tạo token không có thời hạn hết hạn
+        const accessToken = jwt.sign({ id: user._id, role: user.role }, publicKey);
         const refreshToken = jwt.sign({ id: user._id, role: user.role }, privateKey, { expiresIn: '7d' });
-
+    
+        // Cập nhật hoặc tạo mới key token cho user
         await KeyTokenModel.findOneAndUpdate(
-            { user: user._id },
-            { publicKey, privateKey },
-            { new: true, upsert: true }
+          { user: user._id },
+          { publicKey, privateKey },
+          { new: true, upsert: true }
         );
-
+    
         return {
-            user,
-            accessToken,
-            refreshToken
-        }
-    }
+          user,
+          accessToken,
+          refreshToken
+        };
+      }
 
     static async logoutAll(userId) {
         await KeyTokenModel.deleteMany({ user: userId });
