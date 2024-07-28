@@ -1,7 +1,9 @@
-const { log } = require('winston');
+const { loggers } = require('winston');
 const CrabType = require('../models/crabType.model');
 const CrabPurchase = require('../models/crabPurchase.model');
 const AuthError = require('../core/error.response').AuthError;
+
+const logger = loggers.get('default'); // Assume you have configured a default logger
 
 class CrabTypeService {
     static async createCrabType(userId, data) {
@@ -37,7 +39,7 @@ class CrabTypeService {
 
             return { crabType };
         } catch (error) {
-            log.error(`Failed to create crab type: ${error.message}`);
+            logger.error(`Failed to create crab type: ${error.message}`);
             throw error;
         }
     }
