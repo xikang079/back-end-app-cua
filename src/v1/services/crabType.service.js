@@ -6,17 +6,26 @@ const AuthError = require('../core/error.response').AuthError;
 class CrabTypeService {
     static async createCrabType(userId, data) {
         try {
-            // Kiểm tra xem tên loại cua đã tồn tại cho vựa cụ thể hay chưa
+            // Kiểm tra xem tên loại cua đã tồn tại cho tài khoản cụ thể hay chưa
             const existingCrabType = await CrabType.findOne({
                 name: data.name,
                 user: userId,
-                isDeleted: false
             });
 
-            if (existingCrabType) {
+            // Nếu đã tồn tại và không bị xóa, ném lỗi
+            if (existingCrabType && !existingCrabType.isDeleted) {
                 throw new AuthError("Crab type name already exists for this depot!");
             }
 
+            // Nếu đã tồn tại nhưng đã bị xóa, cập nhật lại loại cua
+            if (existingCrabType && existingCrabType.isDeleted) {
+                existingCrabType.isDeleted = false;
+                existingCrabType.pricePerKg = data.pricePerKg;
+                await existingCrabType.save();
+                return { crabType: existingCrabType };
+            }
+
+            // Tạo mới loại cua
             const crabType = await CrabType.create({
                 name: data.name,
                 pricePerKg: data.pricePerKg,
