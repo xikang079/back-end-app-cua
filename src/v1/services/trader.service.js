@@ -4,12 +4,17 @@ const CrabPurchase = require('../models/crabPurchase.model'); // Import mô hìn
 
 class TraderService {
     static async createTrader(userId, data) {
-        // Kiểm tra xem tên thương lái đã tồn tại cho vựa cụ thể hay chưa
         const existingTrader = await Trader.findOne({
             name: data.name,
-            user: userId,
-            isDeleted: false // Chỉ tìm các thương lái chưa bị xóa
+            user: userId
         });
+
+        if (existingTrader && existingTrader.isDeleted) {
+            existingTrader.isDeleted = false;
+            existingTrader.phone = data.phone;
+            await existingTrader.save();
+            return { trader: existingTrader };
+        }
 
         if (existingTrader) {
             throw new AuthError("Trader name already exists for this depot!");
@@ -68,14 +73,14 @@ class TraderService {
             throw new AuthError("Không có quyền truy cập!");
         }
 
-        // Kiểm tra xem Trader có xuất hiện trong hóa đơn nào không
-        const existingPurchase = await CrabPurchase.findOne({
-            'trader': id,
-        });
+        // // Kiểm tra xem Trader có xuất hiện trong hóa đơn nào không
+        // const existingPurchase = await CrabPurchase.findOne({
+        //     'trader': id,
+        // });
 
-        if (existingPurchase) {
-            throw new AuthError("Cannot delete trader as it exists in one or more invoices!");
-        }
+        // if (existingPurchase) {
+        //     throw new AuthError("Cannot delete trader as it exists in one or more invoices!");
+        // }
 
         trader.isDeleted = true;
         await trader.save();
