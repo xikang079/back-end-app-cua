@@ -17,10 +17,10 @@ class CrabTypeController {
         }).sendData(res);
     }
 
-    static async getAllCrabTypesByDepots(req, res, next) {
+    static async getAllCrabTypesByDepot(req, res, next) {
         new OK({
-            message: "Get all crab types by depots success!",
-            metadata: await CrabTypeService.getAllCrabTypesByDepots(),
+            message: "Get all crab types by depot success!",
+            metadata: await CrabTypeService.getAllCrabTypesByDepot(req.params.depotId),
         }).sendData(res);
     }
 

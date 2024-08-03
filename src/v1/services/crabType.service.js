@@ -65,6 +65,10 @@ class CrabTypeService {
         return groupedCrabTypes;
     }
 
+    static async getAllCrabTypesByDepot(depotId) {
+        return await CrabType.find({ user: depotId, isDeleted: false }).lean();
+    }
+
     static async getCrabTypeById(id) {
         const crabType = await CrabType.findById(id).lean();
         if (!crabType || crabType.isDeleted) throw new AuthError("Crab type not found!");

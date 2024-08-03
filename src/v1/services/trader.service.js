@@ -35,17 +35,21 @@ class TraderService {
         return await Trader.find({ user, isDeleted: false }).lean(); // Chỉ trả về các thương lái chưa bị xóa
     }
 
-    static async getAllTradersByDepots() {
-        const traders = await Trader.find({ isDeleted: false }).lean(); // Chỉ trả về các thương lái chưa bị xóa
-        const groupedTraders = traders.reduce((acc, trader) => {
-            const depotId = trader.user.toString();
-            if (!acc[depotId]) {
-                acc[depotId] = [];
-            }
-            acc[depotId].push(trader);
-            return acc;
-        }, {});
-        return groupedTraders;
+    // static async getAllTradersByDepots() {
+    //     const traders = await Trader.find({ isDeleted: false }).lean(); // Chỉ trả về các thương lái chưa bị xóa
+    //     const groupedTraders = traders.reduce((acc, trader) => {
+    //         const depotId = trader.user.toString();
+    //         if (!acc[depotId]) {
+    //             acc[depotId] = [];
+    //         }
+    //         acc[depotId].push(trader);
+    //         return acc;
+    //     }, {});
+    //     return groupedTraders;
+    // }
+
+    static async getAllTradersByDepot(depotId) {
+        return await Trader.find({ user: depotId, isDeleted: false }).lean();
     }
 
     static async getTraderById(id) {

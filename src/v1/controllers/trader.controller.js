@@ -27,11 +27,11 @@ class TraderController {
         }
     }
 
-    static async getAllTradersByDepots(req, res, next) {
+    static async getAllTradersByDepot(req, res, next) {
         try {
-            const result = await TraderService.getAllTradersByDepots();
+            const result = await TraderService.getAllTradersByDepot(req.params.depotId);
             new OK({
-                message: "Get all traders by depots success!",
+                message: "Get all traders by depot success!",
                 metadata: result,
             }).sendData(res);
         } catch (error) {
