@@ -40,8 +40,8 @@ class AuthServices {
         const privateKey = crypto.randomBytes(32).toString('hex');
     
         // Tạo token không có thời hạn hết hạn
-        const accessToken = jwt.sign({ id: user._id, role: user.role }, publicKey);
-        const refreshToken = jwt.sign({ id: user._id, role: user.role }, privateKey, { expiresIn: '7d' });
+        const accessToken = jwt.sign({ id: user._id, role: user.role, depotName: user.depotName }, publicKey);
+        const refreshToken = jwt.sign({ id: user._id, role: user.role, depotName: user.depotName }, privateKey, { expiresIn: '7d' });
     
         // Cập nhật hoặc tạo mới key token cho user
         await KeyTokenModel.findOneAndUpdate(
