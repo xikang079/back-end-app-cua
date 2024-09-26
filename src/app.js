@@ -111,7 +111,9 @@ app.use(handleErrorsValidationMongoose);
 app.use((error, req, res, next) => {
     let userInfo = '';
     if (req.user) {
-        userInfo = `User ID: ${req.user.id}, Username: ${req.user.username}, Tên vựa: ${req.user.depotName}`;
+        console.log('req.user:', req.user); // Log the req.user object
+        const { id, username, depotName } = req.user;
+        userInfo = `User ID: ${id}, Username: ${username || 'N/A'}, Tên vựa: ${depotName || 'N/A'}`;
     } else {
         userInfo = 'Người dùng chưa xác thực';
     }
