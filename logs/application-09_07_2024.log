@@ -1,4 +1,0 @@
-{"level":"error","message":"Error 401: User not found!","timestamp":"2024-07-09T06:17:02.901Z"}
-{"level":"error","message":"Error 401: Cannot delete crab type as it exists in one or more invoices!","timestamp":"2024-07-09T07:47:38.242Z"}
-{"level":"error","message":"Error 500: log.error is not a function","timestamp":"2024-07-09T07:48:04.729Z"}
-{"level":"error","message":"Error 500: log.error is not a function","timestamp":"2024-07-09T10:34:33.861Z"}
