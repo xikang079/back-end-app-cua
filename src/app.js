@@ -109,15 +109,22 @@ app.use(handleErrorsValidationMongoose);
 
 // General error handler
 app.use((error, req, res, next) => {
-    const errorMessage = `Error ${error.status || 500}: ${error.message}`;
+    let userInfo = '';
+    if (req.user) {
+        userInfo = `User ID: ${req.user.id}, Username: ${req.user.deoptName}`;
+    } else {
+        userInfo = 'Người dùng chưa xác thực';
+    }
+    const errorMessage = `Lỗi ${error.status || 500}: ${error.message}. ${userInfo}`;
     logger.error(errorMessage);
     res.status(error.status || 500).send({
         error: {
             status: error.status || 500,
-            message: error.message || 'Internal Server Error',
+            message: error.message || 'Lỗi máy chủ nội bộ',
         },
     });
 });
+
 
 module.exports = {
     app,
